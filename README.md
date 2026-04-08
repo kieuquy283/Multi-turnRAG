@@ -53,29 +53,31 @@ OPENAI_API_KEY=your_api_key_here
 
 Create a data/ folder and add your PDF files:
 
-data/
+```data/
  ├── document1.pdf
  ├── document2.pdf
 🏗️ Build Vector Database
+``` 
 ```bash
 python -m code.build_index
 ``` 
 
 ### This step:
 
-Loads PDF documents
+```Loads PDF documents
 Splits into chunks
 Embeds text
 Stores vectors in FAISS
 💬 Run Chatbot
+```
 ```bash
 python -m code.chat
 ```
 
-### Then start asking questions in terminal.
+Then start asking questions in terminal.
 
-🧠 Pipeline Overview
-User Query
+### 🧠 Pipeline Overview
+```User Query
    ↓
 Embedding
    ↓
@@ -88,3 +90,4 @@ Prompt Construction
 LLM (GPT)
    ↓
 Final Answer
+```
