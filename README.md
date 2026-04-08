@@ -11,31 +11,6 @@ A Retrieval-Augmented Generation (RAG) chatbot system designed for conversationa
 - Generate answers using LLM (OpenAI GPT)
 - Modular pipeline (loader, chunker, retriever, llm, etc.)
 
----
-
-## 📁 Project Structure
-rag_chatbot/
-│
-├── code/
-│ ├── init.py
-│ ├── build_index.py # Build FAISS index from documents
-│ ├── chat.py # Run chatbot
-│ ├── loader.py # Load PDF files
-│ ├── chunker.py # Split documents into chunks
-│ ├── vectorstore.py # FAISS index (build/load)
-│ ├── retriever.py # Retrieve relevant documents
-│ ├── llm.py # LLM interaction (OpenAI)
-│ ├── formatter.py # Prompt construction
-│ └── config.py # Configuration
-│
-├── data/ # (ignored) Input PDF files
-├── faiss_index/ # (ignored) Vector database
-├── .env # API key (not committed)
-├── .gitignore
-├── requirements.txt
-└── README.md
-
----
 
 ## ⚙️ Setup
 
@@ -45,20 +20,27 @@ rag_chatbot/
 git clone https://github.com/your_username/Multi-turnRAG.git
 cd Multi-turnRAG
 
-2. Create virtual environment
+### 2. Create virtual environment
+```bash
 python -m venv rag_env
-Activate:
+
+### Activate:
 
 Windows:
 
+```bash
 rag_env\Scripts\activate
 
 Mac/Linux:
 
+```bash
 source rag_env/bin/activate
-3. Install dependencies
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
-4. Setup environment variables
+
+### 4. Setup environment variables
 
 Create a .env file in root directory:
 
