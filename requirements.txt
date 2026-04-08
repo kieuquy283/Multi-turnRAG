@@ -1,0 +1,22 @@
+# Core
+python-dotenv
+
+# LangChain ecosystem
+langchain
+langchain-community
+langchain-openai
+
+# Vector store
+faiss-cpu
+
+# PDF loader
+pypdf
+
+# Embeddings
+sentence-transformers
+
+# OpenAI
+openai
+
+# Utils
+tqdm
