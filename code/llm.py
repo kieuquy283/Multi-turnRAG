@@ -1,42 +1,36 @@
-from code.formatter import format_context
-from openai import OpenAI
-import os
-from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+
+from code.config import OPENAI_API_KEY, CHAT_MODEL
 
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+def get_llm(model_name: str | None = None, temperature: float = 0.0) -> ChatOpenAI:
+    """
+    Khởi tạo chat model.
 
+    Args:
+        model_name: tên model, nếu None thì dùng CHAT_MODEL
+        temperature: nhiệt độ sinh text
 
-def ask_llm(question, docs):
-    context = format_context(docs)
-
-    prompt = f"""
-Bạn là chuyên gia pháp luật Việt Nam.
-
-YÊU CẦU:
-- Chỉ trả lời dựa trên CONTEXT được cung cấp.
-- Không tự bịa hoặc suy diễn ngoài tài liệu.
-- Nếu không đủ dữ liệu, phải nói rõ: "Không đủ dữ liệu trong tài liệu được truy xuất."
-- Khi trả lời, ưu tiên trích rõ Điều nào trong tài liệu.
-- Trả lời ngắn gọn, rõ ràng, đúng trọng tâm.
-
-CONTEXT:
-{context}
-
-CÂU HỎI:
-{question}
-
-TRẢ LỜI:
-""".strip()
-
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        temperature=0.1,
-        messages=[
-            {"role": "system", "content": "Bạn là trợ lý pháp luật."},
-            {"role": "user", "content": prompt}
-        ]
+    Returns:
+        ChatOpenAI
+    """
+    return ChatOpenAI(
+        model=model_name or CHAT_MODEL,
+        api_key=OPENAI_API_KEY,
+        temperature=temperature
     )
 
-    return response.choices[0].message.content
+
+def generate_answer(prompt: str) -> str:
+    """
+    Gọi LLM để sinh câu trả lời cuối.
+
+    Args:
+        prompt: prompt hoàn chỉnh
+
+    Returns:
+        str: nội dung câu trả lời
+    """
+    llm = get_llm()
+    response = llm.invoke(prompt)
+    return response.content.strip()
