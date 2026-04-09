@@ -14,21 +14,24 @@ A Retrieval-Augmented Generation (RAG) chatbot system designed for conversationa
 
 ## ⚙️ Setup
 
+---
 ### 1. Clone repository
 
 ```bash
 git clone https://github.com/your_username/Multi-turnRAG.git
 cd Multi-turnRAG
 ```
+---
 
+---
 ### 2. Create virtual environment
 ```bash
 python -m venv rag_env
 ```
+---
 
+---
 ### Activate:
-
-### Windows:
 
 ```bash
 rag_env\Scripts\activate
@@ -38,45 +41,62 @@ rag_env\Scripts\activate
 ```bash
 source rag_env/bin/activate
 ``` 
+---
+
 ### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ``` 
 
+---
 ### 4. Setup environment variables
 
-### Create a .env file in root directory:
-
+Create a .env file:
+```bash
 OPENAI_API_KEY=your_api_key_here
-📂 Add Data
+```
+---
+
+---
+## 5. Add Data
 
 Create a data/ folder and add your PDF files:
 
-```data/
+```text
+data/
  ├── document1.pdf
  ├── document2.pdf
-🏗️ Build Vector Database
-``` 
-```bash
-python -m code.build_index
-``` 
-
-### This step:
-
-```Loads PDF documents
-Splits into chunks
-Embeds text
-Stores vectors in FAISS
-💬 Run Chatbot
 ```
+---
+
+---
+## 6. Build vector database
+Build lần đầu
+```bash
+python -m code.build_index build --data-dir data --index-dir faiss_index
+```
+Update (khi thêm/sửa file)
+```bash
+python -m code.build_index update --data-dir data --index-dir faiss_index
+```
+
+This step:
+- Loads PDF documents
+- Splits into chunks
+- Embeds text
+- Stores vectors in FAISS
+
+Run Chatbot
+
 ```bash
 python -m code.chat
 ```
+--- 
 
 Then start asking questions in terminal.
 
-### 🧠 Pipeline Overview
+### 7Pipeline Overview
 ```User Query
    ↓
 Embedding
