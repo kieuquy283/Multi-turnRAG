@@ -55,6 +55,14 @@ pip install -r requirements.txt
 Create a .env file:
 ```bash
 OPENAI_API_KEY=your_api_key_here
+CHAT_MODEL=gpt-4o-mini
+REWRITE_MODEL=gpt-4o-mini
+EMBEDDING_MODEL=text-embedding-3-small
+TOP_K=5
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+HISTORY_TURNS=3
+SHOW_REWRITTEN_QUERY=true
 ```
 ---
 
