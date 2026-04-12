@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
 
-from code.config import OPENAI_API_KEY, CHAT_MODEL
+from code.config import DASHSCOPE_API_KEY, CHAT_MODEL, QWEN_BASE_URL
 
 
 def get_llm(model_name: str | None = None, temperature: float = 0.0) -> ChatOpenAI:
@@ -16,7 +16,8 @@ def get_llm(model_name: str | None = None, temperature: float = 0.0) -> ChatOpen
     """
     return ChatOpenAI(
         model=model_name or CHAT_MODEL,
-        api_key=OPENAI_API_KEY,
+        api_key=DASHSCOPE_API_KEY,
+        base_url=QWEN_BASE_URL,
         temperature=temperature
     )
 

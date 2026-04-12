@@ -17,18 +17,23 @@ load_dotenv(ENV_PATH)
 # =========================
 # API / Models
 # =========================
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "").strip()
+QWEN_BASE_URL = os.getenv("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").strip()
 
-if not OPENAI_API_KEY:
+if not DASHSCOPE_API_KEY:
     raise ValueError(
-        "Không tìm thấy OPENAI_API_KEY. "
+        "Không tìm thấy DASHSCOPE_API_KEY. "
         "Hãy tạo file .env ở thư mục gốc project và thêm:\n"
-        "OPENAI_API_KEY=your_api_key_here"
+        "DASHSCOPE_API_KEY=your_api_key_here"
     )
 
-CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-4o-mini")
+CHAT_MODEL = os.getenv("CHAT_MODEL", "qwen-plus")
 REWRITE_MODEL = os.getenv("REWRITE_MODEL", CHAT_MODEL)
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "local").strip().lower()
+LOCAL_EMBEDDING_MODEL = os.getenv(
+    "LOCAL_EMBEDDING_MODEL",
+    "intfloat/multilingual-e5-base"
+).strip()
 
 # =========================
 # RAG Settings

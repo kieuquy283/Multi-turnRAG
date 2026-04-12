@@ -23,3 +23,6 @@ docx2txt>=0.8
 
 # Utils
 tqdm>=4.66.0
+
+sentence-transformers
+torch

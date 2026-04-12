@@ -5,29 +5,31 @@ import hashlib
 import os
 import re
 import uuid
-from dotenv import load_dotenv
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import docx2txt
+from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
+
+from code.config import INDEX_DIR, LOCAL_EMBEDDING_MODEL
+from code.vectorstore import get_embeddings
 
 
 # =========================
 # Config
 # =========================
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md"}
-DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
+DEFAULT_EMBEDDING_MODEL = LOCAL_EMBEDDING_MODEL
 DEFAULT_CHUNK_SIZE = 1200
 DEFAULT_CHUNK_OVERLAP = 150
-DEFAULT_INDEX_DIRNAME = "vector_store"
+DEFAULT_INDEX_DIRNAME = str(INDEX_DIR)
 MANIFEST_FILENAME = "manifest.json"
 CHUNKS_METADATA_FILENAME = "chunks_metadata.json"
+
 load_dotenv()
 
 
@@ -88,14 +90,43 @@ def index_exists(index_dir: str | Path) -> bool:
     )
 
 
+def build_faiss_in_batches(
+    texts: List[str],
+    metadatas: List[Dict[str, Any]],
+    embedding_model: Any,
+    batch_size: int = 100,
+) -> FAISS:
+    """
+    Build FAISS theo từng lô để giảm áp lực RAM.
+    """
+    if not texts:
+        raise ValueError("No texts to build FAISS.")
+
+    if len(texts) != len(metadatas):
+        raise ValueError("texts và metadatas phải cùng độ dài.")
+
+    first_texts = texts[:batch_size]
+    first_metas = metadatas[:batch_size]
+
+    vectorstore = FAISS.from_texts(
+        texts=first_texts,
+        embedding=embedding_model,
+        metadatas=first_metas,
+    )
+
+    for start in range(batch_size, len(texts), batch_size):
+        end = start + batch_size
+        batch_texts = texts[start:end]
+        batch_metas = metadatas[start:end]
+        print(f"[EMBED BATCH] {start} -> {min(end, len(texts))}/{len(texts)}")
+        vectorstore.add_texts(texts=batch_texts, metadatas=batch_metas)
+
+    return vectorstore
+
+
 # =========================
 # Reading documents
 # =========================
-# def read_pdf(file_path: str | Path) -> str:
-#     loader = PyPDFLoader(str(file_path))
-#     docs = loader.load()
-#     return "\n\n".join(doc.page_content for doc in docs if doc.page_content)
-
 def read_pdf(file_path: str | Path) -> str:
     # Cách 1: PyPDFLoader
     try:
@@ -168,19 +199,14 @@ def read_document(file_path: str | Path) -> str:
 # Chunking
 # =========================
 def split_legal_articles(text: str) -> List[str]:
-    """
-    Ưu tiên tách theo cấu trúc pháp luật kiểu:
-    Điều 1.
-    Điều 2.
-
-    Nếu không match đủ tốt thì fallback sang splitter thường.
-    """
     normalized = re.sub(r"\r\n?", "\n", text).strip()
     if not normalized:
         return []
 
-    # Match "Điều 1.", "Điều 12:", kể cả đầu dòng có khoảng trắng.
-    pattern = re.compile(r"(?im)^\s*(Điều\s+\d+[\.:].*?)(?=^\s*Điều\s+\d+[\.:]|\Z)", re.DOTALL)
+    pattern = re.compile(
+        r"(?im)^\s*(Điều\s+\d+[\.:].*?)(?=^\s*Điều\s+\d+[\.:]|\Z)",
+        re.DOTALL
+    )
     matches = pattern.findall(normalized)
 
     cleaned = [m.strip() for m in matches if m and m.strip()]
@@ -209,7 +235,6 @@ def chunk_document(
     text = read_document(file_path)
     article_chunks = split_legal_articles(text)
 
-    # Nếu tài liệu pháp luật tách được các Điều tương đối ổn thì dùng luôn.
     if len(article_chunks) >= 2:
         final_chunks: List[str] = []
         for chunk in article_chunks:
@@ -279,30 +304,15 @@ def build_chunks_and_metadata_for_file(
 
 
 # =========================
-# Embeddings
-# =========================
-def get_embeddings(model: str = DEFAULT_EMBEDDING_MODEL) -> OpenAIEmbeddings:
-    # Cần biến môi trường OPENAI_API_KEY
-    return OpenAIEmbeddings(model=model)
-
-
-# =========================
 # Main functions
 # =========================
 def build_index_from_documents(
     data_dir: str,
     index_dir: str = DEFAULT_INDEX_DIRNAME,
-    embedding_model: Optional[OpenAIEmbeddings] = None,
+    embedding_model: Optional[Any] = None,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> None:
-    """
-    Build full index từ đầu.
-
-    Dùng khi:
-    - Chưa có index
-    - Hoặc muốn rebuild sạch toàn bộ
-    """
     embedding_model = embedding_model or get_embeddings()
     ensure_dir(index_dir)
 
@@ -334,10 +344,11 @@ def build_index_from_documents(
     if not all_texts:
         raise ValueError("No chunks generated from the provided documents.")
 
-    vectorstore = FAISS.from_texts(
+    vectorstore = build_faiss_in_batches(
         texts=all_texts,
-        embedding=embedding_model,
         metadatas=all_metadatas,
+        embedding_model=embedding_model,
+        batch_size=100,
     )
     vectorstore.save_local(index_dir)
 
@@ -347,22 +358,13 @@ def build_index_from_documents(
     print(f"[BUILD DONE] files={len(files)}, chunks={len(all_texts)}, index_dir={index_dir}")
 
 
-
 def update_index_from_documents(
     data_dir: str,
     index_dir: str = DEFAULT_INDEX_DIRNAME,
-    embedding_model: Optional[OpenAIEmbeddings] = None,
+    embedding_model: Optional[Any] = None,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> None:
-    """
-    Update incremental.
-
-    Xử lý:
-    - file mới   -> add mới
-    - file sửa   -> deactivate chunk cũ + add chunk mới
-    - file xóa   -> deactivate chunk cũ
-    """
     embedding_model = embedding_model or get_embeddings()
 
     if not index_exists(index_dir):
@@ -397,7 +399,6 @@ def update_index_from_documents(
     for file_path in current_files:
         current_hash = file_sha256(file_path)
 
-        # File mới
         if file_path not in manifest:
             texts, metadatas, f_hash = build_chunks_and_metadata_for_file(
                 file_path=file_path,
@@ -414,7 +415,6 @@ def update_index_from_documents(
             print(f"[UPDATE][NEW] {file_path} -> {len(texts)} chunks")
             continue
 
-        # File bị sửa
         if manifest[file_path].get("file_hash") != current_hash:
             deactivated_chunks += deactivate_chunks_for_file(metadata, file_path)
 
@@ -432,7 +432,6 @@ def update_index_from_documents(
             updated_files += 1
             print(f"[UPDATE][MODIFIED] {file_path} -> {len(texts)} new chunks")
 
-    # File bị xóa khỏi kho dữ liệu
     removed_files = old_file_set - current_file_set
     for file_path in sorted(removed_files):
         deactivated_chunks += deactivate_chunks_for_file(metadata, file_path)
@@ -440,7 +439,6 @@ def update_index_from_documents(
         deleted_files += 1
         print(f"[UPDATE][DELETED] {file_path}")
 
-    # Add vector mới vào index
     if new_texts:
         vectorstore.add_texts(texts=new_texts, metadatas=new_metadatas)
         metadata.extend(new_metadatas)
@@ -487,7 +485,7 @@ def main() -> None:
     parser.add_argument("--chunk-overlap", type=int, default=DEFAULT_CHUNK_OVERLAP, help="Chunk overlap for fallback splitter.")
 
     args = parser.parse_args()
-    embeddings = get_embeddings(args.embedding_model)
+    embeddings = get_embeddings()
 
     if args.mode == "build":
         build_index_from_documents(
