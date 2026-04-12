@@ -51,7 +51,7 @@ pip install -r requirements.txt
 
 ---
 ### 4. Setup environment variables
-
+Truy cập link: [get dashscope_api_key](https://modelstudio.console.alibabacloud.com/) để tạo tk -> thêm phương thức thanh toán -> dùng trial
 Create a .env file:
 ```bash
 DASHSCOPE_API_KEY=your_api_key_here
