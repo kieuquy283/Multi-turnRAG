@@ -54,10 +54,12 @@ pip install -r requirements.txt
 
 Create a .env file:
 ```bash
-OPENAI_API_KEY=your_api_key_here
-CHAT_MODEL=gpt-4o-mini
-REWRITE_MODEL=gpt-4o-mini
-EMBEDDING_MODEL=text-embedding-3-small
+DASHSCOPE_API_KEY=your_api_key_here
+QWEN_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+CHAT_MODEL=qwen-plus
+REWRITE_MODEL=qwen-plus
+EMBEDDING_BACKEND=local
+LOCAL_EMBEDDING_MODEL=intfloat/multilingual-e5-base
 TOP_K=5
 CHUNK_SIZE=1000
 CHUNK_OVERLAP=200
@@ -90,9 +92,10 @@ python -m code.build_index update --data-dir data --index-dir faiss_index
 ```
 
 This step:
-- Loads PDF documents
-- Splits into chunks
-- Embeds text
+- Loads documents
+- Extract text (PDF/DOCX)
+- Chunk theo Điều luật hoặc fallback
+- Generate embeddings (local)
 - Stores vectors in FAISS
 
 Run Chatbot
