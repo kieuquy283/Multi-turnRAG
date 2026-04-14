@@ -17,24 +17,18 @@ load_dotenv(ENV_PATH)
 # =========================
 # API / Models
 # =========================
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+VLLM_BASE_URL = os.getenv("VLLM_BASE_URL", "http://localhost:8000/v1").strip()
+VLLM_API_KEY = os.getenv("VLLM_API_KEY", "none").strip() or "none"
 
-if not OPENAI_API_KEY:
-    raise ValueError(
-        "Không tìm thấy OPENAI_API_KEY. "
-        "Hãy tạo file .env ở thư mục gốc project và thêm:\n"
-        "OPENAI_API_KEY=your_api_key_here"
-    )
-
-CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-4o-mini")
+CHAT_MODEL = os.getenv("CHAT_MODEL", "qwen-rag")
 REWRITE_MODEL = os.getenv("REWRITE_MODEL", CHAT_MODEL)
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 # =========================
 # RAG Settings
 # =========================
-TOP_K = int(os.getenv("TOP_K", 5))
-CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 1000))
+TOP_K = int(os.getenv("TOP_K", 7))
+CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 1500))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 200))
 HISTORY_TURNS = int(os.getenv("HISTORY_TURNS", 3))
 

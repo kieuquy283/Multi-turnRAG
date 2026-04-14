@@ -2,20 +2,21 @@ from pathlib import Path
 from typing import List
 
 from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
+from langchain_core.embeddings import Embeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from code.config import OPENAI_API_KEY, EMBEDDING_MODEL, INDEX_DIR
+from code.config import (
+    EMBEDDING_MODEL,
+    INDEX_DIR,
+)
 
 
-def get_embeddings() -> OpenAIEmbeddings:
+def get_embeddings() -> Embeddings:
     """
     Khởi tạo embedding model.
     """
-    return OpenAIEmbeddings(
-        model=EMBEDDING_MODEL,
-        api_key=OPENAI_API_KEY
-    )
+    return HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
 
 def ensure_index_dir() -> None:

@@ -12,17 +12,18 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import docx2txt
+from langchain_core.embeddings import Embeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
 
 
 # =========================
 # Config
 # =========================
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md"}
-DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
+DEFAULT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 DEFAULT_CHUNK_SIZE = 1200
 DEFAULT_CHUNK_OVERLAP = 150
 DEFAULT_INDEX_DIRNAME = "vector_store"
@@ -281,9 +282,8 @@ def build_chunks_and_metadata_for_file(
 # =========================
 # Embeddings
 # =========================
-def get_embeddings(model: str = DEFAULT_EMBEDDING_MODEL) -> OpenAIEmbeddings:
-    # Cần biến môi trường OPENAI_API_KEY
-    return OpenAIEmbeddings(model=model)
+def get_embeddings(model: str = DEFAULT_EMBEDDING_MODEL) -> Embeddings:
+    return HuggingFaceEmbeddings(model_name=model)
 
 
 # =========================
@@ -292,7 +292,7 @@ def get_embeddings(model: str = DEFAULT_EMBEDDING_MODEL) -> OpenAIEmbeddings:
 def build_index_from_documents(
     data_dir: str,
     index_dir: str = DEFAULT_INDEX_DIRNAME,
-    embedding_model: Optional[OpenAIEmbeddings] = None,
+    embedding_model: Optional[Embeddings] = None,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> None:
@@ -351,7 +351,7 @@ def build_index_from_documents(
 def update_index_from_documents(
     data_dir: str,
     index_dir: str = DEFAULT_INDEX_DIRNAME,
-    embedding_model: Optional[OpenAIEmbeddings] = None,
+    embedding_model: Optional[Embeddings] = None,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> None:
