@@ -1,8 +1,11 @@
-from typing import List, Dict, Any
-import re
+from __future__ import annotations
 
-from code.llm import get_llm
-from code.config import HISTORY_TURNS, REWRITE_MODEL
+import re
+from typing import Any, Dict, List
+
+from rag.config.llm import REWRITE_MODEL
+from rag.config.retrieval import HISTORY_TURNS
+from rag.generation.llm_client import get_llm
 
 
 FOLLOW_UP_PATTERNS = [
@@ -29,19 +32,30 @@ FOLLOW_UP_PATTERNS = [
 ]
 
 PRONOUN_KEYWORDS = [
-    "nó", "đó", "điều đó", "việc đó", "cái đó", "họ", "ông ấy", "bà ấy",
-    "loại nào", "trường hợp nào", "đối tượng nào", "cái nào", "mục nào"
+    "nó",
+    "đó",
+    "điều đó",
+    "việc đó",
+    "cái đó",
+    "họ",
+    "ông ấy",
+    "bà ấy",
+    "loại nào",
+    "trường hợp nào",
+    "đối tượng nào",
+    "cái nào",
+    "mục nào",
 ]
 
 
-def format_history_for_rewrite(history: List[Dict[str, Any]], max_turns: int = 3) -> str:
-    """
-    Format lịch sử hội thoại thành text ngắn gọn để phục vụ rewrite.
-    """
+def format_history_for_rewrite(
+    history: List[Dict[str, Any]],
+    max_turns: int = HISTORY_TURNS,
+) -> str:
     if not history:
         return "No previous conversation."
 
-    selected = history[-max_turns * 2:]
+    selected = history[-max_turns * 2 :]
     lines = []
 
     for msg in selected:
@@ -53,12 +67,7 @@ def format_history_for_rewrite(history: List[Dict[str, Any]], max_turns: int = 3
 
 
 def is_likely_follow_up(question: str) -> bool:
-    """
-    Heuristic: xác định xem câu hỏi hiện tại có khả năng là follow-up không.
-    Nếu không phải follow-up thì nên giữ nguyên để tránh rewrite làm hỏng retrieval.
-    """
     q = question.strip().lower()
-
     if not q:
         return False
 
@@ -74,21 +83,13 @@ def is_likely_follow_up(question: str) -> bool:
 
 
 def clean_rewritten_query(text: str) -> str:
-    """
-    Làm sạch output của model để tránh các tiền tố/thừa dòng làm hỏng retrieval.
-    """
     if not text:
         return ""
 
     cleaned = text.strip()
-
-    # Bỏ markdown/code fence nếu có
     cleaned = cleaned.replace("```", "").strip()
-
-    # Lấy dòng đầu tiên nếu model trả nhiều dòng
     cleaned = cleaned.splitlines()[0].strip()
 
-    # Bỏ các tiền tố thường gặp
     prefixes = [
         "rewritten standalone query:",
         "standalone query:",
@@ -99,34 +100,21 @@ def clean_rewritten_query(text: str) -> str:
     lower_cleaned = cleaned.lower()
     for prefix in prefixes:
         if lower_cleaned.startswith(prefix):
-            cleaned = cleaned[len(prefix):].strip()
+            cleaned = cleaned[len(prefix) :].strip()
             break
 
-    # Bỏ dấu ngoặc kép bao ngoài
     cleaned = cleaned.strip("\"'“”‘’").strip()
-
     return cleaned
 
 
 def rewrite_query(current_question: str, history: List[Dict[str, Any]]) -> str:
-    """
-    Rewrite câu hỏi hiện tại thành standalone query nếu thật sự cần.
-    
-    Logic an toàn:
-    - Nếu không có history -> giữ nguyên
-    - Nếu câu hỏi có vẻ đã standalone -> giữ nguyên
-    - Chỉ rewrite khi có dấu hiệu là follow-up
-    - Nếu output model bất thường -> fallback về câu gốc
-    """
     question = current_question.strip()
     if not question:
         raise ValueError("current_question rỗng, không thể rewrite.")
 
-    # Không có history thì không cần rewrite
     if not history:
         return question
 
-    # Nếu câu hỏi có vẻ đã standalone thì giữ nguyên
     if not is_likely_follow_up(question):
         return question
 
@@ -160,11 +148,9 @@ Standalone search query:
     response = llm.invoke(prompt)
     rewritten_query = clean_rewritten_query(response.content)
 
-    # fallback an toàn
     if not rewritten_query:
         return question
 
-    # Nếu model trả quá dài, khả năng cao là rewrite không tốt
     if len(rewritten_query.split()) > max(20, len(question.split()) * 2):
         return question
 

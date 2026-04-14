@@ -1,0 +1,62 @@
+2026-04-14 11:12:13,408 | INFO | rag.ingestion.readers | PyPDFLoader extracted 10538 chars from 1291_QNG_NVDTPC_2026_TinhQuangNgai_Vv_Tuyen_truyen_Nghi_dinh_373_2025_ND_CP.pdf
+2026-04-14 11:12:13,411 | INFO | rag.ingestion.indexing | [BUILD] data\1291_QNG_NVDTPC_2026_TinhQuangNgai_Vv_Tuyen_truyen_Nghi_dinh_373_2025_ND_CP.pdf -> 12 chunks
+2026-04-14 11:12:13,634 | INFO | rag.ingestion.readers | PyPDFLoader extracted 3930 chars from 1696_CT_CS_2026_Vv_Gioi_thieu_Thong_tu_21_2026_TT_BTC.pdf
+2026-04-14 11:12:13,635 | INFO | rag.ingestion.indexing | [BUILD] data\1696_CT_CS_2026_Vv_Gioi_thieu_Thong_tu_21_2026_TT_BTC.pdf -> 5 chunks
+2026-04-14 11:12:13,799 | INFO | rag.ingestion.readers | PyPDFLoader extracted 1586 chars from 1832_CT_CS_2026_Vv_Chinh_sach_thue.pdf
+2026-04-14 11:12:13,801 | INFO | rag.ingestion.indexing | [BUILD] data\1832_CT_CS_2026_Vv_Chinh_sach_thue.pdf -> 2 chunks
+2026-04-14 11:12:16,993 | INFO | rag.ingestion.readers | PyPDFLoader extracted 61750 chars from 18_2026_TT_BTC_Vv_Quy_dinh_ve_ho_so_thu_tuc_quan_ly_thue_doi_voi_ho_kinh_doanh_ca_nhan_kinh_doanh.pdf
+2026-04-14 11:12:16,998 | INFO | rag.ingestion.indexing | [BUILD] data\18_2026_TT_BTC_Vv_Quy_dinh_ve_ho_so_thu_tuc_quan_ly_thue_doi_voi_ho_kinh_doanh_ca_nhan_kinh_doanh.pdf -> 88 chunks
+2026-04-14 11:12:17,504 | INFO | rag.ingestion.readers | PyPDFLoader extracted 16719 chars from 21_2026_TT_BT__Vv_Sua_doi_Thong_tu_80_2021_TT_BTC_huong_dan_Luat_Quan_ly_thue_va_Nghi_dinh_126_2020_ND_CP_huong_dan_Luat_Quan_ly_thue.pdf
+2026-04-14 11:12:17,505 | INFO | rag.ingestion.indexing | [BUILD] data\21_2026_TT_BT__Vv_Sua_doi_Thong_tu_80_2021_TT_BTC_huong_dan_Luat_Quan_ly_thue_va_Nghi_dinh_126_2020_ND_CP_huong_dan_Luat_Quan_ly_thue.pdf -> 22 chunks
+2026-04-14 11:12:17,787 | INFO | rag.ingestion.readers | PyPDFLoader extracted 4856 chars from 241_SLA_QLDN_2026_TinhSonLa_Vv_Khai_thue_nop_thue_thay_cho_ho_kinh_doanh.pdf
+2026-04-14 11:12:17,788 | INFO | rag.ingestion.indexing | [BUILD] data\241_SLA_QLDN_2026_TinhSonLa_Vv_Khai_thue_nop_thue_thay_cho_ho_kinh_doanh.pdf -> 8 chunks
+2026-04-14 11:12:18,262 | INFO | rag.ingestion.readers | PyPDFLoader extracted 10823 chars from 320_QD_UBND_2026_TinhNinhBinh_Vv_Cong_bo_Danh_muc_thu_tuc_hanh_chinh_moi_sua_doi_bo_sung_bai_bo_linh_vuc_Thue_thuoc_pham_vi_chuc_nang_quan_ly_cua_So.pdf
+2026-04-14 11:12:18,265 | INFO | rag.ingestion.indexing | [BUILD] data\320_QD_UBND_2026_TinhNinhBinh_Vv_Cong_bo_Danh_muc_thu_tuc_hanh_chinh_moi_sua_doi_bo_sung_bai_bo_linh_vuc_Thue_thuoc_pham_vi_chuc_nang_quan_ly_cua_So.pdf -> 15 chunks
+2026-04-14 11:12:18,568 | INFO | rag.ingestion.readers | PyPDFLoader extracted 9441 chars from 336_QD_CT_2026_Vv_Quy_dinh_chuc_nang_nhiem_vu_quyen_han_va_co_cau_to_chuc_cua_Chi_cuc_Thue_doanh_nghiep_lon_thuoc_Cuc_Thue.pdf
+2026-04-14 11:12:18,569 | INFO | rag.ingestion.indexing | [BUILD] data\336_QD_CT_2026_Vv_Quy_dinh_chuc_nang_nhiem_vu_quyen_han_va_co_cau_to_chuc_cua_Chi_cuc_Thue_doanh_nghiep_lon_thuoc_Cuc_Thue.pdf -> 13 chunks
+2026-04-14 11:12:18,797 | INFO | rag.ingestion.readers | PyPDFLoader extracted 3924 chars from 661_KHH_QLDN1_2026_TinhKhanhHoa_Vv_Tra_loi_cong_van_0126_CVKN_LDYKH.pdf
+2026-04-14 11:12:18,797 | INFO | rag.ingestion.indexing | [BUILD] data\661_KHH_QLDN1_2026_TinhKhanhHoa_Vv_Tra_loi_cong_van_0126_CVKN_LDYKH.pdf -> 5 chunks
+2026-04-14 11:12:18,924 | INFO | rag.ingestion.readers | PyPDFLoader extracted 1729 chars from 869_DTH_NVD_2026_TinhDongThap_Vv_Trien_khai_Quyet_dinh_108_QD_CT_ve_Chuong_trinh_khung_cap_nhat_kien_thuc_hanh_nghe_dich_vu_lam_thu_tuc_ve_thue_nam_2026.pdf
+2026-04-14 11:12:18,924 | INFO | rag.ingestion.indexing | [BUILD] data\869_DTH_NVD_2026_TinhDongThap_Vv_Trien_khai_Quyet_dinh_108_QD_CT_ve_Chuong_trinh_khung_cap_nhat_kien_thuc_hanh_nghe_dich_vu_lam_thu_tuc_ve_thue_nam_2026.pdf -> 2 chunks
+2026-04-14 11:12:19,139 | INFO | rag.ingestion.readers | PyPDFLoader extracted 3670 chars from 904_CTH_QLDN1_2026_ThanhphoCanTho_Vv_Xuat_hoa_don_ke_khai_nop_thue_thay_Nha_thau_nuoc_ngoai.pdf
+2026-04-14 11:12:19,140 | INFO | rag.ingestion.indexing | [BUILD] data\904_CTH_QLDN1_2026_ThanhphoCanTho_Vv_Xuat_hoa_don_ke_khai_nop_thue_thay_Nha_thau_nuoc_ngoai.pdf -> 5 chunks
+2026-04-14 11:12:19,331 | INFO | rag.ingestion.readers | PyPDFLoader extracted 2384 chars from 989_CT_CS_2026_Vv_Chinh_sach_thue.pdf
+2026-04-14 11:12:19,332 | INFO | rag.ingestion.indexing | [BUILD] data\989_CT_CS_2026_Vv_Chinh_sach_thue.pdf -> 3 chunks
+2026-04-14 11:12:32,974 | INFO | rag.ingestion.readers | PyPDFLoader extracted 486072 chars from [NguyenphuongLaw] Giáo trình Pháp luật Đại cương.pdf
+2026-04-14 11:12:33,034 | INFO | rag.ingestion.indexing | [BUILD] data\[NguyenphuongLaw] Giáo trình Pháp luật Đại cương.pdf -> 619 chunks
+2026-04-14 11:12:51,847 | INFO | rag.ingestion.readers | PyPDFLoader extracted 553364 chars from luat_dan_su.pdf
+2026-04-14 11:12:51,879 | INFO | rag.ingestion.indexing | [BUILD] data\luat_dan_su.pdf -> 652 chunks
+2026-04-14 11:12:52,269 | INFO | rag.ingestion.readers | PyPDFLoader extracted 14981 chars from luat_doanh_nghiep.pdf
+2026-04-14 11:12:52,285 | INFO | rag.ingestion.indexing | [BUILD] data\luat_doanh_nghiep.pdf -> 22 chunks
+2026-04-14 11:13:00,900 | INFO | rag.ingestion.readers | PyPDFLoader extracted 581755 chars from luat_hinh_su.pdf
+2026-04-14 11:13:00,938 | INFO | rag.ingestion.indexing | [BUILD] data\luat_hinh_su.pdf -> 939 chunks
+2026-04-14 11:13:09,128 | INFO | rag.ingestion.readers | PyPDFLoader extracted 195581 chars from luat_lao_dong.pdf
+2026-04-14 11:13:09,128 | INFO | rag.ingestion.indexing | [BUILD] data\luat_lao_dong.pdf -> 346 chunks
+2026-04-14 11:13:31,032 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 200/2758
+2026-04-14 11:13:52,827 | INFO | rag.ingestion.indexing | Embedding batch 200 -> 300/2758
+2026-04-14 11:14:29,911 | INFO | rag.ingestion.indexing | Embedding batch 300 -> 400/2758
+2026-04-14 11:15:09,992 | INFO | rag.ingestion.indexing | Embedding batch 400 -> 500/2758
+2026-04-14 11:15:45,287 | INFO | rag.ingestion.indexing | Embedding batch 500 -> 600/2758
+2026-04-14 11:16:24,787 | INFO | rag.ingestion.indexing | Embedding batch 600 -> 700/2758
+2026-04-14 11:17:04,260 | INFO | rag.ingestion.indexing | Embedding batch 700 -> 800/2758
+2026-04-14 11:17:40,982 | INFO | rag.ingestion.indexing | Embedding batch 800 -> 900/2758
+2026-04-14 11:18:12,308 | INFO | rag.ingestion.indexing | Embedding batch 900 -> 1000/2758
+2026-04-14 11:18:44,599 | INFO | rag.ingestion.indexing | Embedding batch 1000 -> 1100/2758
+2026-04-14 11:19:19,532 | INFO | rag.ingestion.indexing | Embedding batch 1100 -> 1200/2758
+2026-04-14 11:19:51,011 | INFO | rag.ingestion.indexing | Embedding batch 1200 -> 1300/2758
+2026-04-14 11:20:14,845 | INFO | rag.ingestion.indexing | Embedding batch 1300 -> 1400/2758
+2026-04-14 11:20:48,298 | INFO | rag.ingestion.indexing | Embedding batch 1400 -> 1500/2758
+2026-04-14 11:21:26,046 | INFO | rag.ingestion.indexing | Embedding batch 1500 -> 1600/2758
+2026-04-14 11:21:53,681 | INFO | rag.ingestion.indexing | Embedding batch 1600 -> 1700/2758
+2026-04-14 11:22:24,491 | INFO | rag.ingestion.indexing | Embedding batch 1700 -> 1800/2758
+2026-04-14 11:22:59,517 | INFO | rag.ingestion.indexing | Embedding batch 1800 -> 1900/2758
+2026-04-14 11:23:33,893 | INFO | rag.ingestion.indexing | Embedding batch 1900 -> 2000/2758
+2026-04-14 11:24:13,262 | INFO | rag.ingestion.indexing | Embedding batch 2000 -> 2100/2758
+2026-04-14 11:24:48,727 | INFO | rag.ingestion.indexing | Embedding batch 2100 -> 2200/2758
+2026-04-14 11:25:22,236 | INFO | rag.ingestion.indexing | Embedding batch 2200 -> 2300/2758
+2026-04-14 11:25:57,620 | INFO | rag.ingestion.indexing | Embedding batch 2300 -> 2400/2758
+2026-04-14 11:26:30,235 | INFO | rag.ingestion.indexing | Embedding batch 2400 -> 2500/2758
+2026-04-14 11:26:55,162 | INFO | rag.ingestion.indexing | Embedding batch 2500 -> 2600/2758
+2026-04-14 11:27:19,936 | INFO | rag.ingestion.indexing | Embedding batch 2600 -> 2700/2758
+2026-04-14 11:27:44,233 | INFO | rag.ingestion.indexing | Embedding batch 2700 -> 2758/2758
+2026-04-14 11:28:03,727 | INFO | rag.ingestion.indexing | [BUILD DONE] files=17, chunks=2758, index_dir=indexes/default

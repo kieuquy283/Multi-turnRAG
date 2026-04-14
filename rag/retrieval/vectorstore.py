@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import List
 
@@ -6,11 +8,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_community.vectorstores import FAISS
 from sentence_transformers import SentenceTransformer
 
-from code.config import (
-    INDEX_DIR,
-    EMBEDDING_BACKEND,
-    LOCAL_EMBEDDING_MODEL,
-)
+from rag.config.retrieval import DEFAULT_INDEX_DIR, EMBEDDING_BACKEND, LOCAL_EMBEDDING_MODEL
 
 
 class LocalSentenceTransformerEmbeddings(Embeddings):
@@ -19,7 +17,6 @@ class LocalSentenceTransformerEmbeddings(Embeddings):
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         texts = [f"passage: {t}" for t in texts]
-
         embeddings = self.model.encode(
             texts,
             batch_size=16,
@@ -45,33 +42,34 @@ def get_embeddings() -> Embeddings:
     raise ValueError("Chỉ hỗ trợ EMBEDDING_BACKEND=local")
 
 
-def ensure_index_dir() -> None:
-    INDEX_DIR.mkdir(parents=True, exist_ok=True)
+def ensure_index_dir(index_dir: str | Path = DEFAULT_INDEX_DIR) -> None:
+    Path(index_dir).mkdir(parents=True, exist_ok=True)
 
 
-def build_and_save_vectorstore(documents: List[Document]) -> FAISS:
+def build_and_save_vectorstore(
+    documents: List[Document],
+    index_dir: str | Path = DEFAULT_INDEX_DIR,
+) -> FAISS:
     if not documents:
         raise ValueError("Không có documents để build vectorstore.")
 
-    ensure_index_dir()
+    ensure_index_dir(index_dir)
     embeddings = get_embeddings()
 
     vectorstore = FAISS.from_documents(documents, embeddings)
-    vectorstore.save_local(str(INDEX_DIR))
+    vectorstore.save_local(str(index_dir))
 
     return vectorstore
 
 
-def load_vectorstore() -> FAISS:
-    if not INDEX_DIR.exists():
-        raise FileNotFoundError(f"Không tìm thấy thư mục index: {INDEX_DIR}")
+def load_vectorstore(index_dir: str | Path = DEFAULT_INDEX_DIR) -> FAISS:
+    index_dir = Path(index_dir)
+    if not index_dir.exists():
+        raise FileNotFoundError(f"Không tìm thấy thư mục index: {index_dir}")
 
     embeddings = get_embeddings()
-
-    vectorstore = FAISS.load_local(
-        str(INDEX_DIR),
+    return FAISS.load_local(
+        str(index_dir),
         embeddings,
-        allow_dangerous_deserialization=True
+        allow_dangerous_deserialization=True,
     )
-
-    return vectorstore

@@ -2,15 +2,26 @@
 
 A Retrieval-Augmented Generation (RAG) chatbot system designed for conversational AI with multi-turn capability.
 
-## 🚀 Features
-
-- Load PDF documents (e.g., legal documents)
-- Chunk text into manageable segments
-- Build FAISS vector database
-- Retrieve relevant context
-- Generate answers using LLM (OpenAI GPT)
-- Modular pipeline (loader, chunker, retriever, llm, etc.)
-
+---
+## Features
+## Retrieval
+- FAISS vector database
+- Local embeddings (multilingual-e5-base)
+- Legal-aware chunking (split theo Điều luật)
+- Fallback chunking nếu không detect được cấu trúc
+## Multi-turn Reasoning
+- Query rewriting (context-aware)
+- Heuristic + LLM rewrite (an toàn, không phá query)
+- History-aware retrieval
+## Answer Generation
+- Grounded answer (dựa trên tài liệu)
+- Fallback answer (LLM nếu thiếu context)
+- Warning khi không đủ dữ liệu
+## Research / Evaluation
+- Build retrieval corpus từ dataset
+- Evaluate single-turn retrieval
+- Evaluate multi-turn retrieval (with rewrite)
+---
 
 ## ⚙️ Setup
 
@@ -51,7 +62,9 @@ pip install -r requirements.txt
 
 ---
 ### 4. Setup environment variables
+```text
 Truy cập link: [get dashscope_api_key](https://modelstudio.console.alibabacloud.com/) để tạo tk -> thêm phương thức thanh toán -> dùng trial
+```
 Create a .env file:
 ```bash
 DASHSCOPE_API_KEY=your_api_key_here
@@ -84,41 +97,47 @@ data/
 ## 6. Build vector database
 Build lần đầu
 ```bash
-python -m code.build_index build --data-dir data --index-dir faiss_index
+python -m scripts.build_index --data-dir data --index-dir indexes/default
 ```
 Update (khi thêm/sửa file)
 ```bash
-python -m code.build_index update --data-dir data --index-dir faiss_index
+python -m scripts.update_index --data-dir data --index-dir indexes/default
 ```
 
 This step:
-- Loads documents
-- Extract text (PDF/DOCX)
-- Chunk theo Điều luật hoặc fallback
+- Load documents (PDF/DOCX/TXT)
+- Extract text (fallback nhiều tầng)
+- Chunk theo Điều luật
+- Tạo metadata (hash, chunk_id, source_file)
 - Generate embeddings (local)
-- Stores vectors in FAISS
+- Build FAISS index
 
 Run Chatbot
 
 ```bash
-python -m code.chat
+python -m scripts.chat_cli --index-dir indexes/default
 ```
 --- 
 
 Then start asking questions in terminal.
 
-### 7Pipeline Overview
-```User Query
-   ↓
-Embedding
-   ↓
+### 7.Pipeline Overview
+```text
+User Question
+     ↓
+Query Rewriting (multi-turn)
+     ↓
+Embedding (E5)
+     ↓
 FAISS Retrieval
-   ↓
+     ↓
+Filter Active Docs
+     ↓
 Top-k Documents
-   ↓
-Prompt Construction
-   ↓
-LLM (GPT)
-   ↓
-Final Answer
+     ↓
+Prompt Builder
+     ↓
+LLM (Qwen API)
+     ↓
+Answer (Grounded / Fallback)
 ```
