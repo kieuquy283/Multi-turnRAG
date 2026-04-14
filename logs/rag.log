@@ -60,3 +60,7 @@
 2026-04-14 11:27:19,936 | INFO | rag.ingestion.indexing | Embedding batch 2600 -> 2700/2758
 2026-04-14 11:27:44,233 | INFO | rag.ingestion.indexing | Embedding batch 2700 -> 2758/2758
 2026-04-14 11:28:03,727 | INFO | rag.ingestion.indexing | [BUILD DONE] files=17, chunks=2758, index_dir=indexes/default
+2026-04-14 12:04:15,180 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 200/55953
+2026-04-14 12:04:56,458 | INFO | rag.ingestion.indexing | Embedding batch 200 -> 300/55953
+2026-04-14 12:05:29,654 | INFO | rag.ingestion.indexing | Embedding batch 300 -> 400/55953
+2026-04-14 12:06:13,259 | INFO | rag.ingestion.indexing | Embedding batch 400 -> 500/55953

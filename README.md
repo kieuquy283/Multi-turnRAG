@@ -97,11 +97,11 @@ data/
 ## 6. Build vector database
 Build lần đầu
 ```bash
-python -m scripts.build_index --data-dir data --index-dir indexes/default
+python -m scripts.build_index --data-dir data --index-dir faiss_index
 ```
 Update (khi thêm/sửa file)
 ```bash
-python -m scripts.update_index --data-dir data --index-dir indexes/default
+python -m scripts.update_index --data-dir data --index-dir faiss_index
 ```
 
 This step:
@@ -115,7 +115,7 @@ This step:
 Run Chatbot
 
 ```bash
-python -m scripts.chat_cli --index-dir indexes/default
+python -m scripts.chat_cli --index-dir faiss_index
 ```
 --- 
 
