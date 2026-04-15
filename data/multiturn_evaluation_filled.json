@@ -1,0 +1,207 @@
+[
+  {
+    "id": 1,
+    "history": [
+      {
+        "role": "user",
+        "content": "Nhà nước thu hồi đất trong trường hợp nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Nhà nước thu hồi đất trong các trường hợp theo quy định của pháp luật."
+      }
+    ],
+    "question": "Nếu người dân không đồng ý thì sao?",
+    "reference_question": "Người sử dụng đất có quyền gì nếu không đồng ý với việc thu hồi đất?",
+    "ground_truth_cids": [],
+    "ground_truth_contexts": [],
+    "type": "multi_turn"
+  },
+  {
+    "id": 2,
+    "history": [
+      {
+        "role": "user",
+        "content": "Ai có thẩm quyền quyết định thành lập Hội đồng tư vấn cấp Chứng chỉ hành nghề dược Sở Y tế?"
+      },
+      {
+        "role": "assistant",
+        "content": "Cơ quan có thẩm quyền được quy định trong văn bản pháp luật liên quan."
+      }
+    ],
+    "question": "Vậy cấp này quyết định trong trường hợp nào?",
+    "reference_question": "Thẩm quyền của cơ quan trong việc quyết định thành lập Hội đồng tư vấn cấp chứng chỉ hành nghề dược là gì?",
+    "ground_truth_cids": [
+      62339
+    ],
+    "ground_truth_contexts": [
+      "Thành lập Hội đồng\n1. Bộ trưởng Bộ Y tế ra quyết định thành lập Hội đồng tư vấn cấp Chứng chỉ hành nghề dược theo hình thức thi (sau đây gọi tắt là Hội đồng tư vấn cấp Chứng chỉ hành nghề dược Bộ Y tế).\n2. Giám đốc Sở Y tế ra quyết định thành lập Hội đồng tư vấn cấp Chứng chỉ hành nghề dược theo hình thức xét hồ sơ (sau đây gọi tắt là Hội đồng tư vấn cấp Chứng chỉ hành nghề dược Sở Y tế)."
+    ],
+    "type": "multi_turn",
+    "matched_question": "Ai có thẩm quyền quyết định thành lập Hội đồng tư vấn cấp Chứng chỉ hành nghề dược Sở Y tế?"
+  },
+  {
+    "id": 3,
+    "history": [
+      {
+        "role": "user",
+        "content": "Thời hiệu xử phạt đối với nhà xuất bản thực hiện xuất bản điện tử nhưng không được cơ quan nhà nước xác nhận đăng ký hoạt động là bao lâu?"
+      },
+      {
+        "role": "assistant",
+        "content": "Thời hiệu xử phạt được xác định theo quy định xử phạt vi phạm hành chính tương ứng."
+      }
+    ],
+    "question": "Nếu quá thời hạn đó thì còn xử phạt được không?",
+    "reference_question": "Hết thời hiệu xử phạt vi phạm hành chính thì có còn bị xử phạt hay không?",
+    "ground_truth_cids": [
+      235380
+    ],
+    "ground_truth_contexts": [
+      "\"Điều 66. Thời hạn ra quyết định xử phạt vi phạm hành chính\n1. Người có thẩm quyền xử phạt vi phạm hành chính phải ra quyết định xử phạt vi phạm hành chính trong thời hạn 07 ngày, kể từ ngày lập biên bản vi phạm hành chính. Đối với vụ việc có nhiều tình tiết phức tạp mà không thuộc trường hợp giải trình hoặc đối với vụ việc thuộc trường hợp giải trình theo quy định tại khoản 2 và khoản 3 Điều 61 của Luật này thì thời hạn ra quyết định xử phạt tối đa là 30 ngày, kể từ ngày lập biên bản.\nTrường hợp vụ việc đặc biệt nghiêm trọng, có nhiều tình tiết phức tạp và thuộc trường hợp giải trình theo quy định tại đoạn 2 khoản 2 và khoản 3 Điều 61 của Luật này mà cần có thêm thời gian để xác minh, thu thập chứng cứ thì người có thẩm quyền đang giải quyết vụ việc phải báo cáo thủ trưởng trực tiếp của mình bằng văn bản để xin gia hạn; việc gia hạn phải bằng văn bản, thời hạn gia hạn không được quá 30 ngày.\""
+    ],
+    "type": "multi_turn",
+    "matched_question": "Có được gia hạn thời hạn ra quyết định xử phạt vi phạm hành chính không?"
+  },
+  {
+    "id": 4,
+    "history": [
+      {
+        "role": "user",
+        "content": "Việc ký kết, thực hiện thỏa thuận quốc tế nhân danh đơn vị trực thuộc có phải cần báo cáo định kỳ hàng năm hay không?"
+      },
+      {
+        "role": "assistant",
+        "content": "Nghĩa vụ báo cáo được thực hiện theo quy định của văn bản liên quan."
+      }
+    ],
+    "question": "Báo cáo đó gửi cho ai?",
+    "reference_question": "Đơn vị trực thuộc phải báo cáo việc ký kết và thực hiện thỏa thuận quốc tế cho cơ quan nào?",
+    "ground_truth_cids": [],
+    "ground_truth_contexts": [],
+    "type": "multi_turn"
+  },
+  {
+    "id": 5,
+    "history": [
+      {
+        "role": "user",
+        "content": "Đề án sử dụng tài sản công tại đơn vị sự nghiệp công lập vào mục đích kinh doanh, cho thuê, liên doanh, liên kết được quy định thế nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Đề án phải đáp ứng các yêu cầu theo quy định pháp luật về tài sản công."
+      }
+    ],
+    "question": "Vậy ai là người phê duyệt đề án đó?",
+    "reference_question": "Cơ quan hoặc người có thẩm quyền phê duyệt đề án sử dụng tài sản công tại đơn vị sự nghiệp công lập là ai?",
+    "ground_truth_cids": [
+      95397
+    ],
+    "ground_truth_contexts": [
+      "\"Điều 44. Đề án sử dụng tài sản công tại đơn vị sự nghiệp công lập vào mục đích kinh doanh, cho thuê, liên doanh, liên kết\n1. Đơn vị sự nghiệp công lập có trách nhiệm lập đề án sử dụng tài sản công vào mục đích kinh doanh, cho thuê, liên doanh, liên kết theo Mẫu số 02/TSC-ĐA ban hành kèm theo Nghị định này.\n2. Tài sản có giá trị lớn quy định tại điểm a khoản 2 Điều 56, điểm a khoản 2 Điều 57 của Luật Quản lý, sử dụng tài sản công do Bộ trưởng, Thủ trưởng cơ quan trung ương, Ủy ban nhân dân cấp tỉnh quyết định phù hợp với loại tài sản và chức năng, nhiệm vụ, năng lực của đơn vị sự nghiệp thuộc phạm vi quản lý.\n3. Đối với đề án sử dụng tài sản công vào mục đích kinh doanh, cho thuê:\na) Đơn vị sự nghiệp công lập báo cáo cơ quan quản lý cấp trên (nếu có) xem xét, gửi lấy ý kiến thẩm định của cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công (đối với đơn vị thuộc trung ương quản lý), Sở Tài chính (đối với đơn vị thuộc địa phương quản lý);\nb) Trong thời hạn 30 ngày, kể từ ngày nhận được đề án, cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công, Sở Tài chính xem xét, cho ý kiến thẩm định về: Sự cần thiết; sự phù hợp của đề án với chức năng, nhiệm vụ của đơn vị, quy định của pháp luật về quản lý, sử dụng tài sản công và pháp luật có liên quan; các nội dung trong đề án cần phải chỉnh lý, hoàn thiện;\nc) Trong thời hạn 30 ngày, kể từ ngày nhận được ý kiến thẩm định, đơn vị sự nghiệp công lập có trách nhiệm nghiên cứu, tiếp thu ý kiến thẩm định để chỉnh lý, hoàn thiện đề án, trình cơ quan, người có thẩm quyền quy định tại khoản 2 Điều 56, khoản 2 Điều 57 của Luật Quản lý, sử dụng tài sản công phê duyệt. Riêng đối với đề án sử dụng tài sản là cơ sở hoạt động sự nghiệp của đơn vị sự nghiệp công lập thuộc trung ương quản lý có nguyên giá theo sổ kế toán từ 500 tỷ đồng trở lên thì Bộ trưởng, Thủ trưởng cơ quan trung ương phải xin ý kiến của Thủ tướng Chính phủ (đối với đơn vị sự nghiệp công lập thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh phải xin ý kiến của Thường trực Hội đồng nhân dân cùng cấp (đối với đơn vị sự nghiệp thuộc địa phương quản lý) trước khi phê duyệt.\n4. Đối với đề án sử dụng tài sản công vào mục đích liên doanh, liên kết:\na) Đơn vị sự nghiệp công lập báo cáo cơ quan quản lý cấp trên (nếu có) xem xét, gửi cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công (đối với đơn vị thuộc trung ương quản lý), Sở Tài chính (đối với đơn vị thuộc địa phương quản lý);\nb) Trong thời hạn 30 ngày, kể từ ngày nhận được đề án sử dụng tài sản công vào mục đích liên doanh, liên kết, cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công xem xét, có ý kiến về đề án sử dụng tài sản công vào mục đích liên doanh, liên kết của đơn vị sự nghiệp công lập thuộc trung ương quản lý, báo cáo bộ, cơ quan trung ương để lấy ý kiến Bộ Tài chính; Sở Tài chính xem xét, có ý kiến về đề án sử dụng tài sản công vào mục đích liên doanh, liên kết của đơn vị sự nghiệp công lập thuộc địa phương quản lý, báo cáo Ủy ban nhân dân cấp tỉnh để lấy ý kiến Thường trực Hội đồng nhân dân cùng cấp về đề án sử dụng tài sản công vào mục đích liên doanh, liên kết;\nc) Hồ sơ gửi lấy ý kiến Bộ Tài chính, Thường trực Hội đồng nhân dân cấp tỉnh gồm:\n- Văn bản đề nghị kèm theo ý kiến đề xuất của bộ, cơ quan trung ương, Sở Tài chính về đề án sử dụng tài sản công để liên doanh, liên kết của đơn vị: 01 bản chính;\n- Đề án sử dụng tài sản công để liên doanh, liên kết của đơn vị: 01 bản;\n- Văn bản của cơ quan, người có thẩm quyền quy định chức năng, nhiệm vụ và cơ cấu tổ chức của đơn vị: 01 bản sao;\n- Các hồ sơ có liên quan khác (nếu có): 01 bản sao;\nd) Trong thời hạn 30 ngày, kể từ ngày nhận được đầy đủ hồ sơ hợp lệ, Bộ Tài chính, Thường trực Hội đồng nhân dân cấp tỉnh có trách nhiệm cho ý kiến về: Tính đầy đủ, hợp lệ của hồ sơ; sự cần thiết; sự phù hợp của đề án với chức năng, nhiệm vụ của đơn vị, quy định của pháp luật về quản lý, sử dụng tài sản công và pháp luật có liên quan; các nội dung trong đề án cần phải chỉnh lý, hoàn thiện;\nđ) Bộ trưởng, Thủ trưởng cơ quan trung ương (đối với đơn vị thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh (đối với đơn vị thuộc địa phương quản lý) chỉ đạo đơn vị có đề án nghiên cứu, tiếp thu ý kiến để chỉnh lý, hoàn thiện đề án, trình Bộ trưởng, Thủ trưởng cơ quan trung ương (đối với đơn vị thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh (đối với đơn vị thuộc địa phương quản lý) trong thời hạn 30 ngày làm việc, kể từ ngày nhận được ý kiến bằng văn bản của Bộ Tài chính, Thường trực Hội đồng nhân dân cấp tỉnh;\ne) Trong thời hạn 30 ngày, kể từ ngày nhận được đề án hoàn thiện của đơn vị, Bộ trưởng, Thủ trưởng cơ quan trung ương (đối với đơn vị thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh (đối với đơn vị thuộc địa phương quản lý) quyết định phê duyệt đề án theo thẩm quyền hoặc có văn bản hồi đáp đơn vị trong trường hợp không thống nhất với đề án. Riêng đối với đề án sử dụng tài sản là cơ sở hoạt động sự nghiệp của đơn vị sự nghiệp công lập thuộc trung ương quản lý có nguyên giá theo sổ kế toán từ 500 tỷ đồng trở lên thì Bộ trưởng, Thủ trưởng cơ quan trung ương phải xin ý kiến của Thủ tướng Chính phủ trước khi phê duyệt.\""
+    ],
+    "type": "multi_turn",
+    "matched_question": "Đề án sử dụng tài sản công tại đơn vị sự nghiệp công lập vào mục đích kinh doanh, cho thuê, liên doanh, liên kết?"
+  },
+  {
+    "id": 6,
+    "history": [
+      {
+        "role": "user",
+        "content": "Thuế thu nhập cá nhân là loại thuế gì?"
+      },
+      {
+        "role": "assistant",
+        "content": "Đây là loại thuế đánh vào thu nhập chịu thuế của cá nhân theo quy định."
+      }
+    ],
+    "question": "Vậy những ai phải nộp?",
+    "reference_question": "Những đối tượng nào phải nộp thuế thu nhập cá nhân?",
+    "ground_truth_cids": [],
+    "ground_truth_contexts": [],
+    "type": "multi_turn"
+  },
+  {
+    "id": 7,
+    "history": [
+      {
+        "role": "user",
+        "content": "Người sử dụng đất có những quyền gì?"
+      },
+      {
+        "role": "assistant",
+        "content": "Người sử dụng đất có các quyền theo quy định của pháp luật đất đai."
+      }
+    ],
+    "question": "Trong trường hợp đó có được chuyển nhượng không?",
+    "reference_question": "Người sử dụng đất có quyền chuyển nhượng quyền sử dụng đất trong trường hợp nào?",
+    "ground_truth_cids": [],
+    "ground_truth_contexts": [],
+    "type": "multi_turn"
+  },
+  {
+    "id": 8,
+    "history": [
+      {
+        "role": "user",
+        "content": "Điều kiện cấp chứng chỉ hành nghề dược là gì?"
+      },
+      {
+        "role": "assistant",
+        "content": "Điều kiện được quy định trong pháp luật về dược."
+      }
+    ],
+    "question": "Nếu thiếu một điều kiện thì có được cấp không?",
+    "reference_question": "Có được cấp chứng chỉ hành nghề dược khi không đủ điều kiện hay không?",
+    "ground_truth_cids": [
+      67725
+    ],
+    "ground_truth_contexts": [
+      "\"Điều 98. Nguyên tắc cấp Giấy chứng nhận quyền sử dụng đất,quyền sở hữu nhà ở và tài sản khác gắn liền với đất\n1. Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở và tài sản khác gắn liền với đất được cấp theo từng thửa đất. Trường hợp người sử dụng đất đang sử dụng nhiều thửa đất nông nghiệp tại cùng một xã, phường, thị trấn mà có yêu cầu thì được cấp một Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở và tài sản khác gắn liền với đất chung cho các thửa đất đó.\n2. Thửa đất có nhiều người chung quyền sử dụng đất, nhiều người sở hữu chung nhà ở, tài sản khác gắn liền với đất thì Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở và tài sản khác gắn liền với đất phải ghi đầy đủ tên của những người có chung quyền sử dụng đất, người sở hữu chung nhà ở, tài sản khác gắn liền với đất và cấp cho mỗi người 01 Giấy chứng nhận; trường hợp các chủ sử dụng, chủ sở hữu có yêu cầu thì cấp chung một Giấy chứng nhận và trao cho người đại diện.\n3. Người sử dụng đất, chủ sở hữu nhà ở, tài sản khác gắn liền với đất được nhận Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở và tài sản khác gắn liền với đất sau khi đã hoàn thành nghĩa vụ tài chính theo quy định của pháp luật.\nTrường hợp người sử dụng đất, chủ sở hữu nhà ở, tài sản khác gắn liền với đất không thuộc đối tượng phải thực hiện nghĩa vụ tài chính hoặc được miễn, được ghi nợ nghĩa vụ tài chính và trường hợp thuê đất trả tiền thuê đất hàng năm thì được nhận Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở và tài sản khác gắn liền với đất ngay sau khi cơ quan có thẩm quyền cấp.\n[...]\""
+    ],
+    "type": "multi_turn",
+    "matched_question": "Có được cấp giấy chứng nhận quyền sử dụng đất chung cho các thửa đất không?"
+  },
+  {
+    "id": 9,
+    "history": [
+      {
+        "role": "user",
+        "content": "Hành vi nào bị xử phạt trong lĩnh vực xuất bản điện tử?"
+      },
+      {
+        "role": "assistant",
+        "content": "Các hành vi vi phạm bị xử phạt được quy định trong văn bản xử phạt tương ứng."
+      }
+    ],
+    "question": "Mức phạt của hành vi đó là bao nhiêu?",
+    "reference_question": "Mức xử phạt đối với hành vi vi phạm trong lĩnh vực xuất bản điện tử là bao nhiêu?",
+    "ground_truth_cids": [],
+    "ground_truth_contexts": [],
+    "type": "multi_turn"
+  },
+  {
+    "id": 10,
+    "history": [
+      {
+        "role": "user",
+        "content": "Đơn vị sự nghiệp công lập được sử dụng tài sản công vào mục đích nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Việc sử dụng tài sản công phải tuân thủ các mục đích và điều kiện theo quy định."
+      }
+    ],
+    "question": "Nếu dùng để cho thuê thì cần điều kiện gì?",
+    "reference_question": "Điều kiện để đơn vị sự nghiệp công lập sử dụng tài sản công vào mục đích cho thuê là gì?",
+    "ground_truth_cids": [
+      95397
+    ],
+    "ground_truth_contexts": [
+      "\"Điều 44. Đề án sử dụng tài sản công tại đơn vị sự nghiệp công lập vào mục đích kinh doanh, cho thuê, liên doanh, liên kết\n1. Đơn vị sự nghiệp công lập có trách nhiệm lập đề án sử dụng tài sản công vào mục đích kinh doanh, cho thuê, liên doanh, liên kết theo Mẫu số 02/TSC-ĐA ban hành kèm theo Nghị định này.\n2. Tài sản có giá trị lớn quy định tại điểm a khoản 2 Điều 56, điểm a khoản 2 Điều 57 của Luật Quản lý, sử dụng tài sản công do Bộ trưởng, Thủ trưởng cơ quan trung ương, Ủy ban nhân dân cấp tỉnh quyết định phù hợp với loại tài sản và chức năng, nhiệm vụ, năng lực của đơn vị sự nghiệp thuộc phạm vi quản lý.\n3. Đối với đề án sử dụng tài sản công vào mục đích kinh doanh, cho thuê:\na) Đơn vị sự nghiệp công lập báo cáo cơ quan quản lý cấp trên (nếu có) xem xét, gửi lấy ý kiến thẩm định của cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công (đối với đơn vị thuộc trung ương quản lý), Sở Tài chính (đối với đơn vị thuộc địa phương quản lý);\nb) Trong thời hạn 30 ngày, kể từ ngày nhận được đề án, cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công, Sở Tài chính xem xét, cho ý kiến thẩm định về: Sự cần thiết; sự phù hợp của đề án với chức năng, nhiệm vụ của đơn vị, quy định của pháp luật về quản lý, sử dụng tài sản công và pháp luật có liên quan; các nội dung trong đề án cần phải chỉnh lý, hoàn thiện;\nc) Trong thời hạn 30 ngày, kể từ ngày nhận được ý kiến thẩm định, đơn vị sự nghiệp công lập có trách nhiệm nghiên cứu, tiếp thu ý kiến thẩm định để chỉnh lý, hoàn thiện đề án, trình cơ quan, người có thẩm quyền quy định tại khoản 2 Điều 56, khoản 2 Điều 57 của Luật Quản lý, sử dụng tài sản công phê duyệt. Riêng đối với đề án sử dụng tài sản là cơ sở hoạt động sự nghiệp của đơn vị sự nghiệp công lập thuộc trung ương quản lý có nguyên giá theo sổ kế toán từ 500 tỷ đồng trở lên thì Bộ trưởng, Thủ trưởng cơ quan trung ương phải xin ý kiến của Thủ tướng Chính phủ (đối với đơn vị sự nghiệp công lập thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh phải xin ý kiến của Thường trực Hội đồng nhân dân cùng cấp (đối với đơn vị sự nghiệp thuộc địa phương quản lý) trước khi phê duyệt.\n4. Đối với đề án sử dụng tài sản công vào mục đích liên doanh, liên kết:\na) Đơn vị sự nghiệp công lập báo cáo cơ quan quản lý cấp trên (nếu có) xem xét, gửi cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công (đối với đơn vị thuộc trung ương quản lý), Sở Tài chính (đối với đơn vị thuộc địa phương quản lý);\nb) Trong thời hạn 30 ngày, kể từ ngày nhận được đề án sử dụng tài sản công vào mục đích liên doanh, liên kết, cơ quan được giao thực hiện nhiệm vụ quản lý tài sản công quy định tại khoản 2 Điều 19 của Luật Quản lý, sử dụng tài sản công xem xét, có ý kiến về đề án sử dụng tài sản công vào mục đích liên doanh, liên kết của đơn vị sự nghiệp công lập thuộc trung ương quản lý, báo cáo bộ, cơ quan trung ương để lấy ý kiến Bộ Tài chính; Sở Tài chính xem xét, có ý kiến về đề án sử dụng tài sản công vào mục đích liên doanh, liên kết của đơn vị sự nghiệp công lập thuộc địa phương quản lý, báo cáo Ủy ban nhân dân cấp tỉnh để lấy ý kiến Thường trực Hội đồng nhân dân cùng cấp về đề án sử dụng tài sản công vào mục đích liên doanh, liên kết;\nc) Hồ sơ gửi lấy ý kiến Bộ Tài chính, Thường trực Hội đồng nhân dân cấp tỉnh gồm:\n- Văn bản đề nghị kèm theo ý kiến đề xuất của bộ, cơ quan trung ương, Sở Tài chính về đề án sử dụng tài sản công để liên doanh, liên kết của đơn vị: 01 bản chính;\n- Đề án sử dụng tài sản công để liên doanh, liên kết của đơn vị: 01 bản;\n- Văn bản của cơ quan, người có thẩm quyền quy định chức năng, nhiệm vụ và cơ cấu tổ chức của đơn vị: 01 bản sao;\n- Các hồ sơ có liên quan khác (nếu có): 01 bản sao;\nd) Trong thời hạn 30 ngày, kể từ ngày nhận được đầy đủ hồ sơ hợp lệ, Bộ Tài chính, Thường trực Hội đồng nhân dân cấp tỉnh có trách nhiệm cho ý kiến về: Tính đầy đủ, hợp lệ của hồ sơ; sự cần thiết; sự phù hợp của đề án với chức năng, nhiệm vụ của đơn vị, quy định của pháp luật về quản lý, sử dụng tài sản công và pháp luật có liên quan; các nội dung trong đề án cần phải chỉnh lý, hoàn thiện;\nđ) Bộ trưởng, Thủ trưởng cơ quan trung ương (đối với đơn vị thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh (đối với đơn vị thuộc địa phương quản lý) chỉ đạo đơn vị có đề án nghiên cứu, tiếp thu ý kiến để chỉnh lý, hoàn thiện đề án, trình Bộ trưởng, Thủ trưởng cơ quan trung ương (đối với đơn vị thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh (đối với đơn vị thuộc địa phương quản lý) trong thời hạn 30 ngày làm việc, kể từ ngày nhận được ý kiến bằng văn bản của Bộ Tài chính, Thường trực Hội đồng nhân dân cấp tỉnh;\ne) Trong thời hạn 30 ngày, kể từ ngày nhận được đề án hoàn thiện của đơn vị, Bộ trưởng, Thủ trưởng cơ quan trung ương (đối với đơn vị thuộc trung ương quản lý), Chủ tịch Ủy ban nhân dân cấp tỉnh (đối với đơn vị thuộc địa phương quản lý) quyết định phê duyệt đề án theo thẩm quyền hoặc có văn bản hồi đáp đơn vị trong trường hợp không thống nhất với đề án. Riêng đối với đề án sử dụng tài sản là cơ sở hoạt động sự nghiệp của đơn vị sự nghiệp công lập thuộc trung ương quản lý có nguyên giá theo sổ kế toán từ 500 tỷ đồng trở lên thì Bộ trưởng, Thủ trưởng cơ quan trung ương phải xin ý kiến của Thủ tướng Chính phủ trước khi phê duyệt.\""
+    ],
+    "type": "multi_turn",
+    "matched_question": "Đề án sử dụng tài sản công tại đơn vị sự nghiệp công lập vào mục đích kinh doanh, cho thuê, liên doanh, liên kết?"
+  }
+]

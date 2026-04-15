@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual env
+rag_env/
+venv/
+.venv/
+env/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Index artifacts
+faiss_index/
+indexes/
+*.faiss
+*.pkl
+chunks_metadata.json
+manifest.json
+
+# Large/raw data files
+data/*.pdf
+data/*.docx
+data/*.txt
+
+data/retrieval_corpus.json
