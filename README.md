@@ -73,6 +73,7 @@ CHAT_MODEL=qwen-plus
 REWRITE_MODEL=qwen-plus
 EMBEDDING_BACKEND=local
 LOCAL_EMBEDDING_MODEL=intfloat/multilingual-e5-base
+INDEX_DIR=faiss_index
 TOP_K=5
 CHUNK_SIZE=1000
 CHUNK_OVERLAP=200
@@ -113,9 +114,26 @@ Run Chatbot
 ```bash
 python -m scripts.chat_cli --index-dir faiss_index
 ```
+
+Or run the new web chat UI:
+
+```bash
+python -m uvicorn app.api:app --host 127.0.0.1 --port 8000 --reload
+cd chatRAG
+npm install
+npm run dev
+```
+
+Open the browser at `http://localhost:5173` and chat through the web interface.
+
+Use the left-side menu to switch between `Chat` và `Evaluation`. The Evaluation tab tổng hợp kết quả từ:
+- Single-turn Retrieval
+- Multi-turn (No rewrite)
+- Multi-turn (Rewrite)
+
 --- 
 
-Then start asking questions in terminal.
+Then start asking questions in terminal or in the web UI.
 
 ---
 ## 7. Evaluation

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "session-1776816947576",
+    "name": "Session 5",
+    "createdAt": "4/22/2026, 7:15:47 AM",
+    "messages": [
+      {
+        "role": "assistant",
+        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
+        "time": null
+      }
+    ]
+  },
+  {
+    "id": "session-1776815491593",
+    "name": "Session 4",
+    "createdAt": "4/22/2026, 6:51:31 AM",
+    "messages": [
+      {
+        "role": "assistant",
+        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
+        "time": null
+      }
+    ]
+  },
+  {
+    "id": "session-1776815426867",
+    "name": "Session 3",
+    "createdAt": "4/22/2026, 6:50:26 AM",
+    "messages": [
+      {
+        "role": "assistant",
+        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
+        "time": null
+      }
+    ]
+  },
+  {
+    "id": "session-1776815390940",
+    "name": "Session 2",
+    "createdAt": "4/22/2026, 6:49:50 AM",
+    "messages": [
+      {
+        "role": "assistant",
+        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
+        "time": null
+      }
+    ]
+  },
+  {
+    "id": "session-1776814535899",
+    "name": "Nhà nước có quyền can thiệp vào ...",
+    "createdAt": "4/22/2026, 6:35:35 AM",
+    "messages": [
+      {
+        "role": "assistant",
+        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
+        "time": null
+      },
+      {
+        "role": "user",
+        "content": "Nhà nước có quyền can thiệp vào đất đai không",
+        "time": "06:46 AM"
+      },
+      {
+        "role": "assistant",
+        "content": "Có, Nhà nước có quyền can thiệp vào đất đai.\n\nTheo **Document 3**, “Đất đai thuộc sở hữu toàn dân do Nhà nước đại diện chủ sở hữu và thống nhất quản lý”. Điều này khẳng định Nhà nước không chỉ là người quản lý mà còn là đại diện chủ sở hữu đất đai — một vị thế pháp lý cho phép Nhà nước thực hiện các hành vi can thiệp như quy hoạch, thu hồi, giao đất, cho thuê đất, điều chỉnh việc sử dụng đất, v.v.\n\nNgoài ra, **Document 4** nêu rõ: “Chính phủ, Ủy ban nhân dân các cấp thực hiện quyền đại diện chủ sở hữu về đất đai theo thẩm quyền quy định tại Luật này”, và **Document 2** xác định Chính phủ “thống nhất quản lý nhà nước về đất đai trong phạm vi cả nước”, còn các cơ quan nhà nước có trách nhiệm quản lý đất đai theo thẩm quyền.\n\nDo đó, việc Nhà nước can thiệp vào đất đai là **có căn cứ pháp lý rõ ràng**, xuất phát từ quyền đại diện chủ sở hữu và quyền quản lý nhà nước về đất đai.",
+        "time": "06:46 AM"
+      }
+    ]
+  }
+]
