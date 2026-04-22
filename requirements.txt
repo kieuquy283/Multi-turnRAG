@@ -11,6 +11,13 @@ langchain-text-splitters>=0.3.0
 # Vector store
 faiss-cpu>=1.8.0
 
+<<<<<<< HEAD
+=======
+# Web API
+fastapi>=0.111.0
+uvicorn[standard]>=0.23.0
+
+>>>>>>> afc4b2326c014776df660479b984efbfe0a067c5
 # OpenAI
 openai>=1.40.0
 tiktoken>=0.7.0

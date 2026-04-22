@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+<<<<<<< HEAD
 *.pyc
 *.pyo
 *.pyd
@@ -20,10 +21,49 @@ faiss_index/
 
 # Jupyter
 .ipynb_checkpoints/
+=======
+*.py[cod]
+
+# Virtual env
+rag_env/
+venv/
+.venv/
+env/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+>>>>>>> afc4b2326c014776df660479b984efbfe0a067c5
 
 # OS
 .DS_Store
 Thumbs.db
 
+<<<<<<< HEAD
 # VSCode
 .vscode/
+=======
+# Logs
+logs/
+*.log
+
+# Index artifacts
+faiss_index/
+indexes/
+*.faiss
+*.pkl
+chunks_metadata.json
+manifest.json
+
+# Large/raw data files
+data/*.pdf
+data/*.docx
+data/*.txt
+
+data/retrieval_corpus.json
+>>>>>>> afc4b2326c014776df660479b984efbfe0a067c5
