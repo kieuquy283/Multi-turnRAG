@@ -1,5 +1,27 @@
 # Python
 __pycache__/
+<<<<<<< HEAD
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+rag_env/
+venv/
+.env/
+
+# Data
+data/
+
+# FAISS index
+faiss_index/
+
+# Env file (API key)
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+=======
 *.py[cod]
 
 # Virtual env
@@ -16,11 +38,16 @@ env/
 # IDE
 .vscode/
 .idea/
+>>>>>>> afc4b2326c014776df660479b984efbfe0a067c5
 
 # OS
 .DS_Store
 Thumbs.db
 
+<<<<<<< HEAD
+# VSCode
+.vscode/
+=======
 # Logs
 logs/
 *.log
@@ -39,3 +66,4 @@ data/*.docx
 data/*.txt
 
 data/retrieval_corpus.json
+>>>>>>> afc4b2326c014776df660479b984efbfe0a067c5
