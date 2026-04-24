@@ -1,49 +1,92 @@
 [
   {
-    "id": "session-1776816947576",
-    "name": "Session 5",
-    "createdAt": "4/22/2026, 7:15:47 AM",
+    "id": "session-1777016578500",
+    "name": "Chào bạn, nhà nước pháp luật là ...",
+    "createdAt": "4/24/2026, 2:42:58 PM",
     "messages": [
       {
         "role": "assistant",
         "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
-        "time": null
-      }
-    ]
-  },
-  {
-    "id": "session-1776815491593",
-    "name": "Session 4",
-    "createdAt": "4/22/2026, 6:51:31 AM",
-    "messages": [
+        "time": null,
+        "metadata": null
+      },
+      {
+        "role": "user",
+        "content": "Chào bạn, nhà nước pháp luật là gì",
+        "time": "02:43 PM",
+        "metadata": null
+      },
       {
         "role": "assistant",
-        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
-        "time": null
-      }
-    ]
-  },
-  {
-    "id": "session-1776815426867",
-    "name": "Session 3",
-    "createdAt": "4/22/2026, 6:50:26 AM",
-    "messages": [
+        "content": "Không tìm thấy đủ thông tin trong tài liệu để trả lời câu hỏi “Nhà nước pháp luật là gì”. Các đoạn văn trong Context chỉ đề cập đến các khái niệm liên quan như tư vấn viên pháp luật, Cục Trợ giúp pháp lý, Vụ Pháp luật quốc tế, Cơ sở dữ liệu quốc gia về pháp luật và quyền yêu cầu cấp ý kiến pháp lý — nhưng không định nghĩa hoặc giải thích khái niệm **“nhà nước pháp luật”**.",
+        "time": "02:43 PM",
+        "metadata": null
+      },
+      {
+        "role": "user",
+        "content": "Chào bạn, nhà nước pháp luật là gì",
+        "time": "02:46 PM",
+        "metadata": null
+      },
       {
         "role": "assistant",
-        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
-        "time": null
-      }
-    ]
-  },
-  {
-    "id": "session-1776815390940",
-    "name": "Session 2",
-    "createdAt": "4/22/2026, 6:49:50 AM",
-    "messages": [
+        "content": "Không tìm thấy đủ thông tin trong tài liệu để trả lời câu hỏi “Nhà nước pháp luật là gì”. Các đoạn văn trong Context chỉ đề cập đến các khái niệm và đơn vị liên quan như tư vấn viên pháp luật, Cục Trợ giúp pháp lý, Vụ Pháp luật quốc tế, Cơ sở dữ liệu quốc gia về pháp luật và quyền yêu cầu cấp ý kiến pháp lý — nhưng **không định nghĩa, giải thích hoặc đề cập trực tiếp đến khái niệm “nhà nước pháp luật”**.",
+        "time": "02:46 PM",
+        "metadata": null
+      },
+      {
+        "role": "user",
+        "content": "Hi",
+        "time": "02:52 PM",
+        "metadata": null
+      },
       {
         "role": "assistant",
-        "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
-        "time": null
+        "content": "Xin chào! Có thể bạn đang bắt đầu cuộc trò chuyện mới. Nếu bạn có câu hỏi nào liên quan đến pháp luật, tư vấn pháp lý, cơ sở dữ liệu pháp luật, trợ giúp pháp lý hoặc các khái niệm được đề cập trong tài liệu (như tư vấn viên pháp luật, Cục Trợ giúp pháp lý, Vụ Pháp luật quốc tế…), mình sẵn sàng hỗ trợ — **dựa hoàn toàn trên thông tin có trong Context**.\n\nVui lòng đặt câu hỏi cụ thể nhé!",
+        "time": "02:52 PM",
+        "metadata": {
+          "rewritten_query": "Hi",
+          "used_rewrite": false,
+          "show_rewritten_query": true,
+          "grounded": true,
+          "warning": "",
+          "mode": "grounded",
+          "top_files": [
+            {
+              "source_file": "data\\retrieval_corpus.json",
+              "best_score": 0.3543558716773987,
+              "avg_score": 0.3744118869304657,
+              "hits": 5
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "eqwwe",
+        "time": "03:06 PM",
+        "metadata": null
+      },
+      {
+        "role": "assistant",
+        "content": "Câu hỏi “eqwwe” không phải là một câu hỏi có nghĩa hoặc liên quan đến nội dung trong Context. Các tài liệu được cung cấp không chứa thông tin nào về cụm ký tự “eqwwe”, và cũng không có định nghĩa, giải thích hay tham chiếu nào liên quan.\n\n→ Không tìm thấy đủ thông tin trong tài liệu để trả lời.",
+        "time": "03:06 PM",
+        "metadata": {
+          "rewritten_query": "eqwwe",
+          "used_rewrite": false,
+          "show_rewritten_query": true,
+          "grounded": true,
+          "warning": "",
+          "mode": "grounded",
+          "top_files": [
+            {
+              "source_file": "data\\retrieval_corpus.json",
+              "best_score": 0.42656010389328003,
+              "avg_score": 0.4398887038230896,
+              "hits": 5
+            }
+          ]
+        }
       }
     ]
   },
@@ -55,17 +98,20 @@
       {
         "role": "assistant",
         "content": "Xin chào. Tôi có thể giúp gì cho bạn?",
-        "time": null
+        "time": null,
+        "metadata": null
       },
       {
         "role": "user",
         "content": "Nhà nước có quyền can thiệp vào đất đai không",
-        "time": "06:46 AM"
+        "time": "06:46 AM",
+        "metadata": null
       },
       {
         "role": "assistant",
         "content": "Có, Nhà nước có quyền can thiệp vào đất đai.\n\nTheo **Document 3**, “Đất đai thuộc sở hữu toàn dân do Nhà nước đại diện chủ sở hữu và thống nhất quản lý”. Điều này khẳng định Nhà nước không chỉ là người quản lý mà còn là đại diện chủ sở hữu đất đai — một vị thế pháp lý cho phép Nhà nước thực hiện các hành vi can thiệp như quy hoạch, thu hồi, giao đất, cho thuê đất, điều chỉnh việc sử dụng đất, v.v.\n\nNgoài ra, **Document 4** nêu rõ: “Chính phủ, Ủy ban nhân dân các cấp thực hiện quyền đại diện chủ sở hữu về đất đai theo thẩm quyền quy định tại Luật này”, và **Document 2** xác định Chính phủ “thống nhất quản lý nhà nước về đất đai trong phạm vi cả nước”, còn các cơ quan nhà nước có trách nhiệm quản lý đất đai theo thẩm quyền.\n\nDo đó, việc Nhà nước can thiệp vào đất đai là **có căn cứ pháp lý rõ ràng**, xuất phát từ quyền đại diện chủ sở hữu và quyền quản lý nhà nước về đất đai.",
-        "time": "06:46 AM"
+        "time": "06:46 AM",
+        "metadata": null
       }
     ]
   }

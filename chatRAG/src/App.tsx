@@ -2,10 +2,28 @@ import { FormEvent, KeyboardEvent, MouseEvent, useEffect, useState } from "react
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ChatIcon, ChartAnalysisIcon, Settings01Icon, UserIcon, SquareArrowLeft02Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 
+type MessageMetadata = {
+  rewritten_query?: string;
+  used_rewrite?: boolean;
+  show_rewritten_query?: boolean;
+  grounded?: boolean;
+  warning?: string;
+  mode?: string;
+  top_files?: TopFileInfo[];
+};
+
 type Message = {
   role: "user" | "assistant";
   content: string;
   time?: string;
+  metadata?: MessageMetadata;
+};
+
+type TopFileInfo = {
+  source_file: string;
+  best_score: number;
+  avg_score?: number;
+  hits: number;
 };
 
 type ChatResponse = {
@@ -16,7 +34,7 @@ type ChatResponse = {
   grounded: boolean;
   warning: string;
   mode: string;
-  top_files: Array<{ source_file: string; best_score: number; hits: number }>;
+  top_files: TopFileInfo[];
   history: Message[];
 };
 
@@ -59,10 +77,35 @@ function App() {
   const [activeSessionId, setActiveSessionId] = useState<string>("");
   const [chatDropdownOpen, setChatDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState<number[]>([]);
   const [evaluationResults, setEvaluationResults] = useState<EvaluationStats[]>([]);
   const [evaluationLoading, setEvaluationLoading] = useState(false);
   const [evaluationError, setEvaluationError] = useState("");
+  const [trendMetric, setTrendMetric] = useState<"best_score" | "avg_score" | "hits">("avg_score");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const sessionTrendData = sessions
+    .map((session) => {
+      const sessionTopFiles = session.messages
+        .filter((message) => message.role === "assistant" && message.metadata?.top_files)
+        .flatMap((message) => (message.metadata?.top_files as TopFileInfo[]) ?? []);
+
+      if (sessionTopFiles.length === 0) return null;
+
+      const avgBestScore = sessionTopFiles.reduce((sum, file) => sum + (file.best_score ?? 0), 0) / sessionTopFiles.length;
+      const avgScore = sessionTopFiles.reduce((sum, file) => sum + (file.avg_score ?? file.best_score ?? 0), 0) / sessionTopFiles.length;
+      const avgHits = sessionTopFiles.reduce((sum, file) => sum + (file.hits ?? 0), 0) / sessionTopFiles.length;
+
+      return {
+        sessionName: session.name,
+        best_score: avgBestScore,
+        avg_score: avgScore,
+        hits: avgHits,
+      };
+    })
+    .filter((item): item is { sessionName: string; best_score: number; avg_score: number; hits: number } => item !== null);
+
+  const maxSessionTrendValue = Math.max(0.01, ...sessionTrendData.map((item) => item[trendMetric]));
 
   const SESSIONS_API_URL = "http://127.0.0.1:8000/sessions";
 
@@ -201,7 +244,20 @@ function App() {
 
       const data: ChatResponse = await response.json();
       const answerTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const assistantMessage: Message = { role: "assistant", content: data.answer, time: answerTime };
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data.answer,
+        time: answerTime,
+        metadata: {
+          rewritten_query: data.rewritten_query,
+          used_rewrite: data.used_rewrite,
+          show_rewritten_query: data.show_rewritten_query,
+          grounded: data.grounded,
+          warning: data.warning,
+          mode: data.mode,
+          top_files: data.top_files,
+        },
+      };
       const updatedMessagesWithAnswer = [...updatedMessages, assistantMessage];
       updateCurrentSessionMessages(updatedMessagesWithAnswer);
     } catch (err) {
@@ -217,6 +273,12 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleMessageMetadata = (messageIndex: number) => {
+    setExpandedMessages((prev) =>
+      prev.includes(messageIndex) ? prev.filter((index) => index !== messageIndex) : [...prev, messageIndex]
+    );
   };
 
   const fetchEvaluation = async () => {
@@ -388,6 +450,48 @@ function App() {
                       <span>{message.time}</span>
                     </div>
                     <div className="message-body">{message.content}</div>
+                    {message.role === "assistant" && message.metadata && (
+                      <div className="message-meta-actions">
+                        <button
+                          type="button"
+                          className="message-meta-toggle"
+                          onClick={() => toggleMessageMetadata(index)}
+                        >
+                          {expandedMessages.includes(index) ? "Ẩn ..." : "..."}
+                        </button>
+                      </div>
+                    )}
+                    {message.role === "assistant" && message.metadata && expandedMessages.includes(index) && (
+                      <div className="message-meta">
+                        {message.metadata.show_rewritten_query && message.metadata.rewritten_query && (
+                          <div className="message-meta-row">
+                            <span className="meta-key">[Rewritten Query]:</span>
+                            <span>{message.metadata.rewritten_query}</span>
+                          </div>
+                        )}
+                        <div className="message-meta-row">
+                          <span className="meta-key">[Used Rewrite]:</span>
+                          <span>{message.metadata.used_rewrite ? "True" : "False"}</span>
+                        </div>
+                        {message.metadata.mode && (
+                          <div className="message-meta-row">
+                            <span className="meta-key">[Mode]:</span>
+                            <span>{message.metadata.mode}</span>
+                          </div>
+                        )}
+                        {message.metadata.top_files && message.metadata.top_files.length > 0 && (
+                          <div className="message-meta-files">
+                            <div className="meta-files-title">[Top Files]:</div>
+                            {message.metadata.top_files.map((file, fileIndex) => (
+                              <div key={fileIndex} className="message-meta-row message-meta-file">
+                                <span>{fileIndex + 1}. {file.source_file}</span>
+                                <span>best_score={file.best_score.toFixed(4)} | hits={file.hits}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {message.role === "user" && <div className="message-avatar user-avatar">Y</div>}
                 </div>
@@ -478,20 +582,58 @@ function App() {
                       <p>Xem xét hiệu suất truy xuất qua các khoảng đánh giá gần đây.</p>
                     </div>
                     <div className="trend-filters">
-                      <button className="filter-pill active">Recall</button>
-                      <button className="filter-pill">Hit@k</button>
-                      <button className="filter-pill">MRR</button>
+                      <button
+                        type="button"
+                        className={trendMetric === "best_score" ? "filter-pill active" : "filter-pill"}
+                        onClick={() => setTrendMetric("best_score")}
+                      >
+                        Best score
+                      </button>
+                      <button
+                        type="button"
+                        className={trendMetric === "avg_score" ? "filter-pill active" : "filter-pill"}
+                        onClick={() => setTrendMetric("avg_score")}
+                      >
+                        Avg score
+                      </button>
+                      <button
+                        type="button"
+                        className={trendMetric === "hits" ? "filter-pill active" : "filter-pill"}
+                        onClick={() => setTrendMetric("hits")}
+                      >
+                        Hits
+                      </button>
                     </div>
                   </div>
 
                   <div className="trend-card">
+                    <div className="trend-chart-description">
+                      <div className="trend-stat-title">{trendMetric.replace("_", " ").toUpperCase()}</div>
+                      <div className="trend-stat-summary">
+                        Tính trung bình các giá trị top files đã lưu trong chat session.
+                      </div>
+                    </div>
                     <div className="trend-graph">
-                      <div className="trend-bar" style={{ height: "42%" }} />
-                      <div className="trend-bar" style={{ height: "50%" }} />
-                      <div className="trend-bar" style={{ height: "62%" }} />
-                      <div className="trend-bar" style={{ height: "70%" }} />
-                      <div className="trend-bar" style={{ height: "82%" }} />
-                      <div className="trend-bar" style={{ height: "88%" }} />
+                      {sessionTrendData.length > 0 ? (
+                        sessionTrendData.map((item) => {
+                          const value = item[trendMetric];
+                          const barHeight = `${Math.max(10, Math.min((value / maxSessionTrendValue) * 100, 100))}%`;
+                          return (
+                            <div key={item.sessionName} className="trend-bar-wrapper">
+                              <div className="trend-bar" style={{ height: barHeight }}>
+                                <span className="trend-bar-value">
+                                  {trendMetric === "hits"
+                                    ? value.toFixed(2)
+                                    : value.toFixed(3)}
+                                </span>
+                              </div>
+                              <div className="trend-bar-label">{item.sessionName}</div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="empty-state">Không có dữ liệu chat session để tính xu hướng.</div>
+                      )}
                     </div>
                   </div>
                 </div>

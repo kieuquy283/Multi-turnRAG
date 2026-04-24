@@ -21,6 +21,7 @@ class ChatMessage(BaseModel):
     role: str
     content: str
     time: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class ChatSession(BaseModel):
