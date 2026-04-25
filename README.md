@@ -96,68 +96,80 @@ data/
 
 ---
 ## 6. Build vector database
-Build (nếu chưa embedding, ở đây là đã embedding và lưu ở faiss_index)
+Run from the project root `E:\Multi-turnRAG`.
+
+### Build from JSON dataset
 ```bash
-python -m scripts.build_index --corpus-json data/retrieval_corpus.json --mode from_json --index-dir faiss_index
+python -m scripts.build_index --corpus-json data/DataSetRAG.json --mode from_json --index-dir faiss_index
 ```
 
-This step:
-- Load documents (PDF/DOCX/TXT)
-- Extract text (fallback nhiều tầng)
-- Chunk theo Điều luật
-- Tạo metadata (hash, chunk_id, source_file)
+### Build from raw PDFs
+```bash
+python -m scripts.build_index --mode documents --data-dir data/PDF --index-dir faiss_index
+```
+
+This step will:
+- Load source documents
+- Extract text (PDF/DOCX/TXT)
+- Chunk theo Điều luật hoặc fallback
+- Tạo metadata (chunk_id, source_file, ...)
 - Generate embeddings (local)
-- Build FAISS index
+- Save FAISS index vào `faiss_index`
 
-Run Chatbot
+---
+## 7. Run the chatbot
 
+### Terminal CLI
 ```bash
 python -m scripts.chat_cli --index-dir faiss_index
 ```
 
-Or run the new web chat UI:
-
+### Web UI
 ```bash
 python -m uvicorn app.api:app --host 127.0.0.1 --port 8000 --reload
+```
+In another terminal:
+```bash
 cd chatRAG
 npm install
 npm run dev
 ```
-
-Open the browser at `http://localhost:5173` and chat through the web interface.
-
-Use the left-side menu to switch between `Chat` và `Evaluation`. The Evaluation tab tổng hợp kết quả từ:
-- Single-turn Retrieval
-- Multi-turn (No rewrite)
-- Multi-turn (Rewrite)
-
---- 
-
-Then start asking questions in terminal or in the web UI.
+Open browser at `http://localhost:5173`.
 
 ---
-## 7. Evaluation
-7.1 Single-turn Retrieval
+## 8. Evaluation
+Run evaluation from the project root.
+
+### 8.1 Single-turn Retrieval
 ```bash
 python -m scripts.evaluate_retrieval --eval-path data/evaluation.json --index-dir faiss_index --top-k 10
 ```
-7.2. Multi-turn (No rewrite)
+
+### 8.2 Multi-turn Retrieval (No rewrite)
 ```bash
 python -m scripts.evaluate_multiturn_retrieval --eval-path data/multiturn_evaluation_filled.json --index-dir faiss_index --top-k 10
 ```
 
-7.3. Multi-turn (rewrite)
+### 8.3 Multi-turn Retrieval (Rewrite)
 ```bash
 python -m scripts.evaluate_multiturn_retrieval --eval-path data/multiturn_evaluation_filled.json --index-dir faiss_index --top-k 10 --use-rewrite
 ```
+
+> Note: `7.2` vẫn dùng query gốc, nên đôi khi kết quả giống `7.1` nếu không có rewrite.
+
 Evaluation Metrics
 | Metric   | Ý nghĩa                             |
 | -------- | ----------------------------------- |
 | Hit@k    | Có tìm được tài liệu đúng không     |
+| Precision@k | Trong kết quả trả về, bao nhiêu phần trăm là đúng |
 | Recall@k | Tìm được bao nhiêu tài liệu đúng    |
+| F1       | Trung bình điều hòa của Precision và Recall |
 | MRR      | Tài liệu đúng đứng vị trí bao nhiêu |
 
-### 8.Pipeline Overview
+> F1 = 2 * Precision * Recall / (Precision + Recall)
+
+---
+## 9. Pipeline Overview
 ```text
 User Question
      ↓

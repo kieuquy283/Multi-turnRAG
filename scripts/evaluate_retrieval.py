@@ -19,9 +19,20 @@ def compute_metrics(retrieved_cids: List[Any], gt_cids: List[Any]):
 
     hit = int(any(cid in gt_set for cid in retrieved_cids))
 
+    retrieved_set = set(retrieved_cids)
+    intersection = retrieved_set & gt_set
+
+    precision = 0.0
+    if retrieved_cids:
+        precision = len(intersection) / len(retrieved_cids)
+
     recall = 0.0
     if gt_set:
-        recall = len(set(retrieved_cids) & gt_set) / len(gt_set)
+        recall = len(intersection) / len(gt_set)
+
+    f1 = 0.0
+    if precision + recall > 0:
+        f1 = 2.0 * precision * recall / (precision + recall)
 
     mrr = 0.0
     for rank, cid in enumerate(retrieved_cids, start=1):
@@ -29,7 +40,7 @@ def compute_metrics(retrieved_cids: List[Any], gt_cids: List[Any]):
             mrr = 1.0 / rank
             break
 
-    return hit, recall, mrr
+    return hit, precision, recall, f1, mrr
 
 
 def evaluate_retrieval(
@@ -48,8 +59,10 @@ def evaluate_retrieval(
         print("[INFO] Evaluation dataset rỗng.")
         return
 
-    total_hit = 0
+    total_hit = 0.0
+    total_precision = 0.0
     total_recall = 0.0
+    total_f1 = 0.0
     total_mrr = 0.0
 
     print(f"[INFO] Running evaluation on {total} samples...\n")
@@ -70,10 +83,12 @@ def evaluate_retrieval(
 
         retrieved_cids = extract_cids_from_docs(docs)
 
-        hit, recall, mrr = compute_metrics(retrieved_cids, gt_cids)
+        hit, precision, recall, f1, mrr = compute_metrics(retrieved_cids, gt_cids)
 
         total_hit += hit
+        total_precision += precision
         total_recall += recall
+        total_f1 += f1
         total_mrr += mrr
 
         if i < 5:
@@ -81,12 +96,14 @@ def evaluate_retrieval(
             print(f"Q{i+1}: {question}")
             print("GT CIDs  :", gt_cids)
             print("Retrieved:", retrieved_cids)
-            print(f"Hit={hit}, Recall={recall:.2f}, MRR={mrr:.2f}")
+            print(f"Hit={hit}, Precision={precision:.2f}, Recall={recall:.2f}, F1={f1:.2f}, MRR={mrr:.2f}")
 
     print("\n===== FINAL METRICS =====")
     print(f"Samples: {total}")
     print(f"Hit@{top_k}: {total_hit / total:.4f}")
+    print(f"Precision@{top_k}: {total_precision / total:.4f}")
     print(f"Recall@{top_k}: {total_recall / total:.4f}")
+    print(f"F1: {total_f1 / total:.4f}")
     print(f"MRR: {total_mrr / total:.4f}")
 
 

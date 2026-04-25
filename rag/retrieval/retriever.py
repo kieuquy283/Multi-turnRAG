@@ -54,6 +54,8 @@ def extract_cids_from_docs(docs: List[Document]) -> List[Any]:
     cids: List[Any] = []
     for doc in docs:
         cid = doc.metadata.get("cid")
+        if cid is None:
+            cid = doc.metadata.get("chunk_id")
         if cid is not None:
             cids.append(cid)
     return cids

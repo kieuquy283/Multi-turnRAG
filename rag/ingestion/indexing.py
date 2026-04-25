@@ -285,6 +285,7 @@ def build_index_from_corpus_json(
 
         enriched_metadata = {
             "chunk_id": str(i),
+            "cid": metadata.get("cid") or metadata.get("chunk_id") or str(i),
             "source_file": str(corpus_path),
             "file_hash": corpus_file_hash,
             "content_hash": sha256_text(text),

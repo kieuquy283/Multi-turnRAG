@@ -54,7 +54,9 @@ class EvaluationStats(BaseModel):
     eval_path: str
     sample_count: int
     hit: float
+    precision: float
     recall: float
+    f1: float
     mrr: float
 
 
@@ -107,16 +109,24 @@ def save_sessions(sessions: list[ChatSession]) -> list[ChatSession]:
     return sessions
 
 
-def compute_metrics(retrieved_cids: list[Any], gt_cids: list[Any]) -> tuple[float, float, float]:
+def compute_metrics(retrieved_cids: list[Any], gt_cids: list[Any]) -> tuple[float, float, float, float, float]:
     gt_set = set(gt_cids)
+    retrieved_set = set(retrieved_cids)
+    intersection = retrieved_set & gt_set
+
     hit = float(int(any(cid in gt_set for cid in retrieved_cids)))
-    recall = float(len(set(retrieved_cids) & gt_set) / len(gt_set)) if gt_set else 0.0
+    precision = float(len(intersection) / len(retrieved_cids)) if retrieved_cids else 0.0
+    recall = float(len(intersection) / len(gt_set)) if gt_set else 0.0
+    f1 = 0.0
+    if precision + recall > 0:
+        f1 = 2.0 * precision * recall / (precision + recall)
+
     mrr = 0.0
     for rank, cid in enumerate(retrieved_cids, start=1):
         if cid in gt_set:
             mrr = 1.0 / rank
             break
-    return hit, recall, mrr
+    return hit, precision, recall, f1, mrr
 
 
 def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> EvaluationStats:
@@ -127,7 +137,9 @@ def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> Eva
     vectorstore = load_vectorstore(index_dir=index_dir)
     total = 0
     total_hit = 0.0
+    total_precision = 0.0
     total_recall = 0.0
+    total_f1 = 0.0
     total_mrr = 0.0
 
     for sample in data:
@@ -143,10 +155,12 @@ def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> Eva
         docs = filter_active_docs(docs, top_k=top_k)
         retrieved_cids = extract_cids_from_docs(docs)
 
-        hit, recall, mrr = compute_metrics(retrieved_cids, gt_cids)
+        hit, precision, recall, f1, mrr = compute_metrics(retrieved_cids, gt_cids)
         total += 1
         total_hit += hit
+        total_precision += precision
         total_recall += recall
+        total_f1 += f1
         total_mrr += mrr
 
     if total == 0:
@@ -158,7 +172,9 @@ def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> Eva
         eval_path=eval_path,
         sample_count=total,
         hit=total_hit / total,
+        precision=total_precision / total,
         recall=total_recall / total,
+        f1=total_f1 / total,
         mrr=total_mrr / total,
     )
 
@@ -171,7 +187,9 @@ def evaluate_multiturn(eval_path: str, index_dir: str, top_k: int = 10, use_rewr
     vectorstore = load_vectorstore(index_dir=index_dir)
     total = 0
     total_hit = 0.0
+    total_precision = 0.0
     total_recall = 0.0
+    total_f1 = 0.0
     total_mrr = 0.0
 
     for sample in data:
@@ -189,10 +207,12 @@ def evaluate_multiturn(eval_path: str, index_dir: str, top_k: int = 10, use_rewr
         docs = filter_active_docs(docs, top_k=top_k)
         retrieved_cids = extract_cids_from_docs(docs)
 
-        hit, recall, mrr = compute_metrics(retrieved_cids, gt_cids)
+        hit, precision, recall, f1, mrr = compute_metrics(retrieved_cids, gt_cids)
         total += 1
         total_hit += hit
+        total_precision += precision
         total_recall += recall
+        total_f1 += f1
         total_mrr += mrr
 
     if total == 0:
@@ -205,7 +225,9 @@ def evaluate_multiturn(eval_path: str, index_dir: str, top_k: int = 10, use_rewr
         eval_path=eval_path,
         sample_count=total,
         hit=total_hit / total,
+        precision=total_precision / total,
         recall=total_recall / total,
+        f1=total_f1 / total,
         mrr=total_mrr / total,
     )
 
