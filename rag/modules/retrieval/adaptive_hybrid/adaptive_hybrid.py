@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from retrieval.fusion import (
+from ..fusion import (
     reciprocal_rank_fusion,
     weighted_fusion,
 )
@@ -12,8 +12,8 @@ from .query_analyzer import (
 from .retrieval_policy import (
     AdaptiveRetrievalPolicy,
 )
-from retrieval.schemas import RetrievalResult
-from retrieval.utils import (
+from ..schemas import RetrievalResult
+from ..utils import (
     deduplicate_results,
 )
 
