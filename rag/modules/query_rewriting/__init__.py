@@ -1,6 +1,7 @@
 from .base import BaseQueryRewriter
 from .formatter import format_history_for_rewrite
 from .llm_rewrite import LLMQueryRewrite, MultiQueryRewrite
+from .multi_query import MultiQueryGenerator
 from .no_rewrite import NoRewrite
 from .utils import (
     RewriteDecision,
@@ -15,6 +16,7 @@ from .utils import (
 __all__ = [
     "BaseQueryRewriter",
     "LLMQueryRewrite",
+    "MultiQueryGenerator",
     "MultiQueryRewrite",
     "NoRewrite",
     "RewriteDecision",

@@ -1,3 +1,10 @@
+"""
+Legacy compatibility module.
+
+This file is kept to avoid breaking older pipeline/API/evaluation code.
+New code should use rag.modules.* composition under a modular pipeline.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List

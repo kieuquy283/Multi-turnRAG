@@ -1,110 +1,29 @@
+"""
+Legacy compatibility module.
+
+This file is kept to avoid breaking older pipeline/API/evaluation code.
+New code should use rag.modules.query_rewriting.
+"""
+
 from __future__ import annotations
 
-import re
 from typing import Any, Dict, List
 
 from rag.config.llm import REWRITE_MODEL
 from rag.config.retrieval import HISTORY_TURNS
 from rag.generation.llm_client import get_llm
-
-
-FOLLOW_UP_PATTERNS = [
-    r"^vậy",
-    r"^thế",
-    r"^còn",
-    r"^nếu",
-    r"^như vậy",
-    r"^trường hợp",
-    r"^loại nào",
-    r"^khi nào",
-    r"^ở đâu",
-    r"^bao giờ",
-    r"^bao nhiêu",
-    r"^ai",
-    r"^đối tượng nào",
-    r"^cái đó",
-    r"^điều đó",
-    r"^việc đó",
-    r"^nó",
-    r"^họ",
-    r"^được không",
-    r"^có được không",
-]
-
-PRONOUN_KEYWORDS = [
-    "nó",
-    "đó",
-    "điều đó",
-    "việc đó",
-    "cái đó",
-    "họ",
-    "ông ấy",
-    "bà ấy",
-    "loại nào",
-    "trường hợp nào",
-    "đối tượng nào",
-    "cái nào",
-    "mục nào",
-]
+from rag.modules.query_rewriting import clean_rewritten_query, is_likely_follow_up
+from rag.modules.query_rewriting.formatter import format_history_for_rewrite as modular_format_history_for_rewrite
 
 
 def format_history_for_rewrite(
     history: List[Dict[str, Any]],
     max_turns: int = HISTORY_TURNS,
 ) -> str:
-    if not history:
-        return "No previous conversation."
-
-    selected = history[-max_turns * 2 :]
-    lines = []
-
-    for msg in selected:
-        role = str(msg.get("role", "user")).capitalize()
-        content = str(msg.get("content", "")).strip()
-        lines.append(f"{role}: {content}")
-
-    return "\n".join(lines)
-
-
-def is_likely_follow_up(question: str) -> bool:
-    q = question.strip().lower()
-    if not q:
-        return False
-
-    for pattern in FOLLOW_UP_PATTERNS:
-        if re.search(pattern, q):
-            return True
-
-    for keyword in PRONOUN_KEYWORDS:
-        if keyword in q:
-            return True
-
-    return False
-
-
-def clean_rewritten_query(text: str) -> str:
-    if not text:
-        return ""
-
-    cleaned = text.strip()
-    cleaned = cleaned.replace("```", "").strip()
-    cleaned = cleaned.splitlines()[0].strip()
-
-    prefixes = [
-        "rewritten standalone query:",
-        "standalone query:",
-        "rewritten query:",
-        "query:",
-    ]
-
-    lower_cleaned = cleaned.lower()
-    for prefix in prefixes:
-        if lower_cleaned.startswith(prefix):
-            cleaned = cleaned[len(prefix) :].strip()
-            break
-
-    cleaned = cleaned.strip("\"'“”‘’").strip()
-    return cleaned
+    return modular_format_history_for_rewrite(
+        history=history,
+        max_messages=max_turns * 2,
+    )
 
 
 def rewrite_query(current_question: str, history: List[Dict[str, Any]]) -> str:

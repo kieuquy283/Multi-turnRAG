@@ -1,31 +1,21 @@
+"""
+Legacy compatibility script.
+
+This evaluator is kept for older multi-turn retrieval checks.
+New ablation experiments should prefer model-specific scripts under scripts/.
+"""
+
 from __future__ import annotations
 
 import argparse
 from typing import Any, Dict, List
 
+from rag.evaluation.metrics import compute_retrieval_metrics
 from rag.retrieval.query_rewriter import rewrite_query
 from rag.retrieval.ranking import filter_active_docs
 from rag.retrieval.retriever import extract_cids_from_docs, retrieve_documents
 from rag.retrieval.vectorstore import load_vectorstore
 from rag.utils.io import load_json
-
-
-def compute_metrics(retrieved_cids: List[Any], gt_cids: List[Any]):
-    gt_set = set(gt_cids)
-
-    hit = int(any(cid in gt_set for cid in retrieved_cids))
-
-    recall = 0.0
-    if gt_set:
-        recall = len(set(retrieved_cids) & gt_set) / len(gt_set)
-
-    mrr = 0.0
-    for rank, cid in enumerate(retrieved_cids, start=1):
-        if cid in gt_set:
-            mrr = 1.0 / rank
-            break
-
-    return hit, recall, mrr
 
 
 def evaluate_multiturn(
@@ -56,7 +46,7 @@ def evaluate_multiturn(
         docs = filter_active_docs(docs, top_k=top_k)
         retrieved_cids = extract_cids_from_docs(docs)
 
-        hit, recall, mrr = compute_metrics(retrieved_cids, gt_cids)
+        hit, recall, mrr = compute_retrieval_metrics(retrieved_cids, gt_cids)
 
         total += 1
         total_hit += hit

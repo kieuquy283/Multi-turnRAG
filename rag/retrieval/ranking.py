@@ -1,3 +1,10 @@
+"""
+Legacy compatibility module.
+
+This file is kept to avoid breaking older pipeline/API/evaluation code.
+New research retrieval code should use rag.modules.retrieval and rag.modules.reranking.
+"""
+
 from __future__ import annotations
 
 from collections import defaultdict

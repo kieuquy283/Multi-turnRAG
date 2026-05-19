@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from rag.config.retrieval import DEFAULT_INDEX_DIR
+from rag.evaluation.metrics import compute_retrieval_metrics
 from rag.ingestion.indexing import index_exists
-from rag.pipelines.chat_pipeline import ChatPipeline
+from rag.pipelines.factory import build_chat_pipeline
 from rag.retrieval.query_rewriter import rewrite_query
 from rag.retrieval.vectorstore import load_vectorstore
 from rag.retrieval.retriever import extract_cids_from_docs, retrieve_documents
@@ -81,7 +82,7 @@ if not index_exists(default_index_dir) and index_exists(faiss_index_dir):
 elif not index_exists(default_index_dir) and not index_exists(faiss_index_dir):
     selected_index_dir = default_index_dir
 
-pipeline = ChatPipeline(index_dir=str(selected_index_dir))
+pipeline = build_chat_pipeline(index_dir=str(selected_index_dir))
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SESSION_FILE_PATH = ROOT_DIR / "data" / "chat_sessions.json"
@@ -105,18 +106,6 @@ def get_sessions() -> list[ChatSession]:
 def save_sessions(sessions: list[ChatSession]) -> list[ChatSession]:
     save_chat_sessions([session.dict() for session in sessions])
     return sessions
-
-
-def compute_metrics(retrieved_cids: list[Any], gt_cids: list[Any]) -> tuple[float, float, float]:
-    gt_set = set(gt_cids)
-    hit = float(int(any(cid in gt_set for cid in retrieved_cids)))
-    recall = float(len(set(retrieved_cids) & gt_set) / len(gt_set)) if gt_set else 0.0
-    mrr = 0.0
-    for rank, cid in enumerate(retrieved_cids, start=1):
-        if cid in gt_set:
-            mrr = 1.0 / rank
-            break
-    return hit, recall, mrr
 
 
 def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> EvaluationStats:
@@ -143,11 +132,11 @@ def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> Eva
         docs = filter_active_docs(docs, top_k=top_k)
         retrieved_cids = extract_cids_from_docs(docs)
 
-        hit, recall, mrr = compute_metrics(retrieved_cids, gt_cids)
+        hit, recall, mrr = compute_retrieval_metrics(retrieved_cids, gt_cids)
         total += 1
-        total_hit += hit
-        total_recall += recall
-        total_mrr += mrr
+        total_hit += float(hit)
+        total_recall += float(recall)
+        total_mrr += float(mrr)
 
     if total == 0:
         raise ValueError(f"No valid evaluation samples found in: {eval_path}")
@@ -189,11 +178,11 @@ def evaluate_multiturn(eval_path: str, index_dir: str, top_k: int = 10, use_rewr
         docs = filter_active_docs(docs, top_k=top_k)
         retrieved_cids = extract_cids_from_docs(docs)
 
-        hit, recall, mrr = compute_metrics(retrieved_cids, gt_cids)
+        hit, recall, mrr = compute_retrieval_metrics(retrieved_cids, gt_cids)
         total += 1
-        total_hit += hit
-        total_recall += recall
-        total_mrr += mrr
+        total_hit += float(hit)
+        total_recall += float(recall)
+        total_mrr += float(mrr)
 
     if total == 0:
         raise ValueError(f"No valid evaluation samples found in: {eval_path}")

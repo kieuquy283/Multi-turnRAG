@@ -1,35 +1,25 @@
+"""
+Legacy compatibility script.
+
+This evaluator is kept for general single-turn retrieval checks.
+New ablation experiments should prefer model-specific scripts under scripts/.
+"""
+
 from __future__ import annotations
 
 import argparse
-import json
 from typing import Any, Dict, List
 
+from rag.evaluation.metrics import compute_retrieval_metrics
 from rag.retrieval.vectorstore import load_vectorstore
 from rag.retrieval.retriever import retrieve_documents, extract_cids_from_docs
 from rag.retrieval.ranking import filter_active_docs
+from rag.utils.io import load_json
 
 
 def load_evaluation_data(path: str) -> List[Dict[str, Any]]:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def compute_metrics(retrieved_cids: List[Any], gt_cids: List[Any]):
-    gt_set = set(gt_cids)
-
-    hit = int(any(cid in gt_set for cid in retrieved_cids))
-
-    recall = 0.0
-    if gt_set:
-        recall = len(set(retrieved_cids) & gt_set) / len(gt_set)
-
-    mrr = 0.0
-    for rank, cid in enumerate(retrieved_cids, start=1):
-        if cid in gt_set:
-            mrr = 1.0 / rank
-            break
-
-    return hit, recall, mrr
+    data = load_json(path, [])
+    return data if isinstance(data, list) else []
 
 
 def evaluate_retrieval(
@@ -70,7 +60,7 @@ def evaluate_retrieval(
 
         retrieved_cids = extract_cids_from_docs(docs)
 
-        hit, recall, mrr = compute_metrics(retrieved_cids, gt_cids)
+        hit, recall, mrr = compute_retrieval_metrics(retrieved_cids, gt_cids)
 
         total_hit += hit
         total_recall += recall
