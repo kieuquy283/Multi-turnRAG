@@ -1,438 +1,162 @@
 from __future__ import annotations
 
-from typing import Dict, Any
-import re
+from typing import Any, Dict, List, Optional
 
-from rag.config.llm import (
-    REWRITE_MODEL
-)
+from rag.config.llm import REWRITE_MODEL
+from rag.generation.llm_client import get_llm
 
-from rag.generation.llm_client import (
-    get_llm
-)
-
-from .base import (
-    BaseQueryRewriter
-)
-
-from .prompts import (
-    REWRITE_PROMPT
-)
-
+from .base import BaseQueryRewriter
+from .prompts import REWRITE_PROMPT
+from .rewrite_cache import RewriteCache
 from .utils import (
-    format_history_for_rewrite,
-    should_skip_rewrite,
+    RewriteDecision,
+    RewriteValidationResult,
+    analyze_query_dependency,
     clean_rewritten_query,
-    is_likely_follow_up,
+    validate_rewrite,
 )
 
 
-class LLMQueryRewrite(
-    BaseQueryRewriter
-):
-    """
-    LLM-based query rewriting module.
-
-    Strategy:
-        1. Detect whether rewrite is necessary
-        2. Format selected history
-        3. Rewrite into standalone query
-        4. Clean and validate output
-    """
-
+class LLMQueryRewrite(BaseQueryRewriter):
     def __init__(
         self,
         model_name: str = REWRITE_MODEL,
         temperature: float = 0.0,
         max_rewrite_ratio: float = 2.0,
         max_tokens_multiplier: int = 20,
+        use_cache: bool = True,
+        cache_size: int = 1000,
     ):
-
         self.model_name = model_name
-
         self.temperature = temperature
-
-        self.max_rewrite_ratio = (
-            max_rewrite_ratio
-        )
-
-        self.max_tokens_multiplier = (
-            max_tokens_multiplier
-        )
-
+        self.max_rewrite_ratio = max_rewrite_ratio
+        self.max_tokens_multiplier = max_tokens_multiplier
+        self.use_cache = use_cache
+        self.cache = RewriteCache(max_size=cache_size) if use_cache else None
         self.llm = get_llm(
             model_name=self.model_name,
             temperature=self.temperature,
         )
 
+    def analyze_query_dependency(self, query: str, has_history: bool) -> RewriteDecision:
+        return analyze_query_dependency(query, has_history=has_history)
+
     def should_rewrite(
         self,
         query: str,
-        selected_history,
+        selected_history: List[Dict[str, Any]],
     ) -> bool:
-        """
-        Determine whether rewrite is needed.
-        """
-
-        if not query.strip():
-            return False
-
-        if should_skip_rewrite(
-            selected_history
-        ):
-            return False
-
-        if not is_likely_follow_up(
-            query
-        ):
-            return False
-
-        return True
-
+        return self.analyze_query_dependency(query, bool(selected_history)).should_rewrite
 
     def validate_rewrite(
         self,
         original_query: str,
         rewritten_query: str,
-    ) -> bool:
-        """
-        Validate rewritten query quality.
-
-        Validation Strategy:
-            1. Non-empty check
-            2. Length explosion detection
-            3. Answer-style detection
-            4. Hallucinated formatting detection
-            5. Semantic preservation heuristic
-            6. Keyword preservation
-            7. Repetition detection
-        """
-
-        # =====================================================
-        # Normalize
-        # =====================================================
-
-        original_query = (
-            original_query.strip()
+        decision: RewriteDecision,
+    ) -> RewriteValidationResult:
+        return validate_rewrite(
+            original_query=original_query,
+            rewritten_query=rewritten_query,
+            decision=decision,
+            max_rewrite_ratio=self.max_rewrite_ratio,
+            max_tokens_multiplier=self.max_tokens_multiplier,
         )
 
-        rewritten_query = (
-            rewritten_query.strip()
-        )
+    def _invoke_llm(
+        self,
+        query: str,
+        history_text: str,
+    ) -> str:
+        prompt = REWRITE_PROMPT.format(history=history_text, query=query)
+        response = self.llm.invoke(prompt)
+        return clean_rewritten_query(getattr(response, "content", response))
 
-        # =====================================================
-        # Empty check
-        # =====================================================
-
-        if not rewritten_query:
-            return False
-
-        # =====================================================
-        # Exact same query is valid
-        # =====================================================
-
-        if (
-            rewritten_query.lower()
-            ==
-            original_query.lower()
-        ):
-            return True
-
-        # =====================================================
-        # Token length validation
-        # =====================================================
-
-        original_tokens = (
-            original_query.split()
-        )
-
-        rewritten_tokens = (
-            rewritten_query.split()
-        )
-
-        original_len = len(
-            original_tokens
-        )
-
-        rewritten_len = len(
-            rewritten_tokens
-        )
-
-        max_allowed = max(
-            self.max_tokens_multiplier,
-            int(
-                original_len
-                * self.max_rewrite_ratio
-            ),
-        )
-
-        if rewritten_len > max_allowed:
-            return False
-
-        # =====================================================
-        # Extremely short rewritten query
-        # =====================================================
-
-        if rewritten_len <= 1:
-            return False
-
-        # =====================================================
-        # Detect answer-style outputs
-        # =====================================================
-
-        answer_patterns = [
-
-            r"là\s",
-            r"bao gồm",
-            r"được hiểu là",
-            r"là một",
-            r"refer to",
-            r"is a",
-            r"means",
-            r"can be",
-        ]
-
-        lowered = rewritten_query.lower()
-
-        for pattern in answer_patterns:
-
-            if re.search(pattern, lowered):
-
-                # Allow if query itself
-                # already contains similar phrasing
-
-                if pattern not in (
-                    original_query.lower()
-                ):
-                    return False
-
-        # =====================================================
-        # Detect hallucinated formatting
-        # =====================================================
-
-        invalid_patterns = [
-
-            r"^answer:",
-            r"^response:",
-            r"^giải thích",
-            r"^rewrite:",
-            r"^rewritten query:",
-            r"^standalone query:",
-        ]
-
-        for pattern in invalid_patterns:
-
-            if re.search(
-                pattern,
-                lowered
-            ):
-                return False
-
-        # =====================================================
-        # Detect excessive punctuation
-        # =====================================================
-
-        if rewritten_query.count("?") > 2:
-            return False
-
-        # =====================================================
-        # Detect repetition
-        # =====================================================
-
-        repeated = re.search(
-            r"\b(\w+)\s+\1\b",
-            lowered
-        )
-
-        if repeated:
-            return False
-
-        # =====================================================
-        # Keyword preservation
-        # =====================================================
-
-        original_keywords = {
-
-            token.lower()
-
-            for token in original_tokens
-
-            if len(token) >= 4
-        }
-
-        rewritten_keywords = {
-
-            token.lower()
-
-            for token in rewritten_tokens
-
-            if len(token) >= 4
-        }
-
-        # Avoid over-strict filtering
-        # for very short queries
-
-        if len(original_keywords) >= 2:
-
-            overlap = (
-                len(
-                    original_keywords
-                    &
-                    rewritten_keywords
-                )
-                /
-                len(original_keywords)
-            )
-
-            if overlap < 0.3:
-                return False
-
-        # =====================================================
-        # Preserve numbers
-        # =====================================================
-
-        original_numbers = re.findall(
-            r"\d+",
-            original_query
-        )
-
-        rewritten_numbers = re.findall(
-            r"\d+",
-            rewritten_query
-        )
-
-        for number in original_numbers:
-
-            if number not in rewritten_numbers:
-                return False
-
-        # =====================================================
-        # Preserve uppercase entities
-        # =====================================================
-
-        original_entities = [
-
-            token
-
-            for token
-            in original_query.split()
-
-            if len(token) > 1
-            and token[0].isupper()
-        ]
-
-        rewritten_text_lower = (
-            rewritten_query.lower()
-        )
-
-        for entity in original_entities:
-
-            if (
-                entity.lower()
-                not in rewritten_text_lower
-            ):
-                return False
-
-        return True
-    
     def rewrite(
         self,
         query: str,
         history_text: str,
     ) -> str:
-        """
-        Rewrite query using LLM.
-        """
+        return self._invoke_llm(query=query, history_text=history_text)
 
-        prompt = REWRITE_PROMPT.format(
-            history=history_text,
-            query=query,
-        )
+    def run(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        query = self.get_query_from_state(state)
+        selected_history, history_text = self.get_history_from_state(state)
+        state["formatted_history"] = history_text
 
-        response = self.llm.invoke(
-            prompt
-        )
+        decision = self.analyze_query_dependency(query, has_history=bool(selected_history))
 
-        rewritten_query = (
-            clean_rewritten_query(
-                response.content
-            )
-        )
+        rewritten_query = query
+        validation = RewriteValidationResult(True, [])
+        fallback_reason: Optional[str] = None
+        cache_hit = False
 
-        return rewritten_query
+        if decision.should_rewrite:
+            cached_rewrite = None
+            if self.cache is not None:
+                cached_rewrite = self.cache.get(query=query, history_text=history_text)
 
-    def run(
-        self,
-        state: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Execute query rewriting module.
-        """
+            if cached_rewrite is not None:
+                rewritten_query = cached_rewrite
+                cache_hit = True
+                validation = self.validate_rewrite(query, rewritten_query, decision)
+                if not validation.passed:
+                    fallback_reason = "invalid_cached_rewrite"
+                    rewritten_query = query
+            else:
+                llm_rewrite = self.rewrite(query=query, history_text=history_text)
+                validation = self.validate_rewrite(query, llm_rewrite, decision)
 
-        query = state.get(
-            "query",
-            ""
-        ).strip()
+                if validation.passed:
+                    rewritten_query = llm_rewrite
+                    if self.cache is not None:
+                        self.cache.set(
+                            query=query,
+                            history_text=history_text,
+                            rewritten_query=rewritten_query,
+                        )
+                else:
+                    fallback_reason = "invalid_rewrite"
+                    rewritten_query = query
 
-        selected_history = state.get(
-            "selected_history",
-            []
-        )
-
-        history_text = (
-            format_history_for_rewrite(
-                selected_history
-            )
-        )
-
-        state[
-            "formatted_history"
-        ] = history_text
-
-        if not self.should_rewrite(
-            query,
-            selected_history,
-        ):
-
-            state[
-                "rewritten_query"
-            ] = query
-
-            state[
-                "rewrite_applied"
-            ] = False
-
-            return state
-
-        rewritten_query = self.rewrite(
-            query=query,
-            history_text=history_text,
-        )
-
-        if not self.validate_rewrite(
-            query,
-            rewritten_query,
-        ):
-
-            rewritten_query = query
-
-        state[
-            "rewritten_query"
-        ] = rewritten_query
-
-        state[
-            "rewrite_applied"
-        ] = (
-            rewritten_query != query
-        )
-
+        state["rewritten_query"] = rewritten_query
+        state["queries"] = [rewritten_query]
+        state["rewrite_applied"] = rewritten_query != query
+        state["query_rewriting"] = {
+            "strategy": "llm",
+            "input_query": query,
+            "rewritten_query": rewritten_query,
+            "queries": [rewritten_query],
+            "should_rewrite": decision.should_rewrite,
+            "rewrite_applied": rewritten_query != query,
+            "decision_reason": decision.reason,
+            "decision_confidence": float(decision.confidence),
+            "query_type": decision.query_type,
+            "validation_passed": bool(validation.passed),
+            "validation_errors": list(validation.errors),
+            "fallback_reason": fallback_reason,
+            "cache_hit": cache_hit,
+            "model_name": self.model_name,
+        }
         return state
 
-    def __repr__(self):
-
+    def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}("
             f"model_name={self.model_name}, "
-            f"temperature={self.temperature}"
-            f")"
+            f"temperature={self.temperature}, "
+            f"use_cache={self.use_cache})"
         )
+
+
+class MultiQueryRewrite(LLMQueryRewrite):
+    def run(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        state = super().run(state)
+        primary_query = state["rewritten_query"]
+        state["queries"] = [
+            primary_query,
+            primary_query,
+            primary_query,
+        ]
+        state["query_rewriting"]["strategy"] = "multi_query_placeholder"
+        state["query_rewriting"]["queries"] = list(state["queries"])
+        return state

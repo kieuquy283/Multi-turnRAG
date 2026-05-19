@@ -1,561 +1,364 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List
+from dataclasses import dataclass
+from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
 
-# =========================================================
-# Constants
-# =========================================================
+DEFAULT_EMPTY_HISTORY = "No previous conversation."
 
-DEFAULT_EMPTY_HISTORY = (
-    "No previous conversation."
+VI_EXPLICIT_FOLLOW_UP_PATTERNS = (
+    r"^còn(?: .*?)?(?: thì sao)?\??$",
+    r"^vậy(?: .*?)?(?: thì sao)?\??$",
+    r"^thế(?: .*?)?(?: thì sao)?\??$",
+    r"^nếu\b.*",
+    r"^trường hợp\b.*",
+    r".*\bthì sao\??$",
+    r"^cái đó\b.*",
+    r"^việc đó\b.*",
+    r"^như vậy\b.*",
 )
 
+EN_EXPLICIT_FOLLOW_UP_PATTERNS = (
+    r"^what about\b.*",
+    r"^how about\b.*",
+    r"^and then\b.*",
+    r"^in that case\b.*",
+    r"^what if\b.*",
+)
 
-# =========================================================
-# Explicit Follow-up Patterns
-# =========================================================
-
-FOLLOW_UP_PATTERNS = [
-
-    # continuation
-    r"^vậy",
-    r"^thế",
-    r"^còn",
-    r"^thế còn",
-    r"^nếu",
-    r"^như vậy",
-    r"^trường hợp",
-    r"^với trường hợp",
-
-    # references
-    r"^cái đó",
-    r"^điều đó",
-    r"^việc đó",
-    r"^nội dung đó",
-    r"^quy định đó",
-    r"^thông tin đó",
-
-    # pronouns
-    r"^nó",
-    r"^họ",
-    r"^ông ấy",
-    r"^bà ấy",
-
-    # incomplete dependent questions
-    r"^loại nào",
-    r"^mục nào",
-    r"^đối tượng nào",
-    r"^trường hợp nào",
-
-    # ambiguous short questions
-    r"^bao nhiêu",
-    r"^bao lâu",
-    r"^khi nào",
-    r"^ở đâu",
-    r"^bao giờ",
-    r"^ai",
-
-    # yes/no dependent
-    r"^được không",
-    r"^có được không",
-]
-
-
-# =========================================================
-# Pronoun / Reference Keywords
-# =========================================================
-
-PRONOUN_KEYWORDS = [
-
-    "nó",
-    "đó",
-    "điều đó",
-    "việc đó",
+FOLLOW_UP_KEYWORDS = (
+    "còn",
+    "vậy",
+    "thế",
+    "nếu",
+    "trường hợp",
+    "thì sao",
     "cái đó",
+    "việc đó",
+    "như vậy",
+    "what about",
+    "how about",
+    "and then",
+    "in that case",
+    "what if",
+)
 
+PRONOUN_REFERENCE_KEYWORDS = (
+    "nó",
     "họ",
-    "ông ấy",
-    "bà ấy",
-
-    "loại nào",
-    "mục nào",
-    "đối tượng nào",
-    "trường hợp nào",
-    "cái nào",
-]
-
-
-# =========================================================
-# Implicit Dependency Keywords
-# =========================================================
-
-IMPLICIT_DEPENDENCY_KEYWORDS = [
-
-    # legal / policy continuation
-    "mức phạt",
-    "xử phạt",
-    "quy định này",
-    "quy định đó",
+    "đó",
+    "này",
+    "việc này",
+    "việc đó",
     "trường hợp này",
-    "trường hợp trên",
+    "trường hợp đó",
+    "cái đó",
+    "it",
+    "they",
+    "this",
+    "that",
+    "those",
+    "these",
+)
 
-    # continuation
-    "cái này",
-    "loại này",
-    "vấn đề này",
-    "nội dung này",
+SHORT_AMBIGUOUS_PATTERNS = (
+    r"^phạt bao nhiêu\??$",
+    r"^có được không\??$",
+    r"^được không\??$",
+    r"^xử lý thế nào\??$",
+    r"^khi nào\??$",
+    r"^bao nhiêu\??$",
+    r"^bao giờ\??$",
+    r"^ở đâu\??$",
+    r"^how much\??$",
+    r"^when\??$",
+)
 
-    # comparison
-    "khác gì",
-    "khác nhau",
-    "giống nhau",
+STANDALONE_PATTERNS = (
+    r".*\blà gì\??$",
+    r"^giải thích\b.*",
+    r"^định nghĩa\b.*",
+    r"^hướng dẫn\b.*",
+    r"^trình bày\b.*",
+    r"^phân tích\b.*",
+    r"^what is\b.*",
+    r"^define\b.*",
+    r"^explain\b.*",
+    r"^how to\b.*",
+)
 
-    # applicability
-    "áp dụng",
-    "có áp dụng",
-    "được áp dụng",
-]
+ANSWER_STYLE_PATTERNS = (
+    r"^\s*answer\s*:",
+    r"^\s*response\s*:",
+    r"^\s*rewrite\s*:",
+    r"^\s*rewritten query\s*:",
+    r"^\s*rewritten standalone query\s*:",
+    r"^\s*standalone query\s*:",
+    r"^\s*trả lời\s*:",
+    r"^\s*giải thích\s*:",
+)
 
+STRONG_ENTITY_TERMS = (
+    "RAG",
+    "FAISS",
+    "BM25",
+    "HS",
+    "CO",
+    "CQ",
+    "A11",
+    "E11",
+)
 
-# =========================================================
-# Standalone Query Indicators
-# =========================================================
-
-STANDALONE_PATTERNS = [
-
-    # english
-    r"^what is",
-    r"^how to",
-    r"^define",
-    r"^explain",
-
-    # vietnamese
-    r"^là gì",
-    r"^giải thích",
-    r"^định nghĩa",
-    r"^hướng dẫn",
-]
-
-
-# =========================================================
-# Generic Text Utilities
-# =========================================================
-
-def normalize_text(
-    text: str
-) -> str:
-    """
-    Normalize whitespace and lowercase text.
-    """
-
-    return " ".join(
-        str(text).strip().lower().split()
-    )
-
-
-def safe_strip(
-    value: Any
-) -> str:
-    """
-    Safely convert to string and strip.
-    """
-
-    return str(value).strip()
+STRONG_ENTITY_PATTERN = re.compile(
+    r"\b(?:RAG|FAISS|BM25|HS|CO|CQ|A11|E11|[A-Z]{2,10}\d{0,4})\b"
+)
+LEGAL_REFERENCE_PATTERN = re.compile(
+    r"\b(?:Điều|Nghị định|Thông tư)\s+\d+\b", re.IGNORECASE
+)
+NUMBER_PATTERN = re.compile(r"\d+")
+WORD_PATTERN = re.compile(r"\b\w+\b", re.UNICODE)
 
 
-# =========================================================
-# Conversation Turn Utilities
-# =========================================================
+@dataclass
+class RewriteDecision:
+    should_rewrite: bool
+    reason: str
+    confidence: float
+    query_type: str
 
-def get_turn_role(
-    turn: Dict[str, Any]
-) -> str:
-    """
-    Extract normalized role.
-    """
 
-    role = str(
-        turn.get("role", "user")
-    ).strip().lower()
+@dataclass
+class RewriteValidationResult:
+    passed: bool
+    errors: List[str]
 
-    role_mapping = {
+
+def safe_strip(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def normalize_text(text: str) -> str:
+    return " ".join(safe_strip(text).lower().split())
+
+
+def normalize_whitespace(text: str) -> str:
+    return " ".join(safe_strip(text).split())
+
+
+def contains_pattern(text: str, patterns: Sequence[str]) -> bool:
+    return any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns)
+
+
+def contains_keyword(text: str, keywords: Iterable[str]) -> bool:
+    normalized = normalize_text(text)
+    return any(keyword in normalized for keyword in keywords)
+
+
+def is_vietnamese_query(text: str) -> bool:
+    return bool(re.search(r"[ăâđêôơưáàảãạấầẩẫậéèẻẽẹíìỉĩịóòỏõọúùủũụýỳỷỹỵ]", text.lower()))
+
+
+def get_turn_role(turn: Mapping[str, Any]) -> str:
+    role = normalize_text(turn.get("role", "user"))
+    return {
         "human": "User",
         "user": "User",
         "assistant": "Assistant",
         "ai": "Assistant",
         "system": "System",
-    }
+    }.get(role, role.capitalize() or "User")
 
-    return role_mapping.get(
-        role,
-        role.capitalize()
-    )
 
+def get_turn_content(turn: Mapping[str, Any]) -> str:
+    return normalize_whitespace(turn.get("content", ""))
 
-def get_turn_content(
-    turn: Dict[str, Any]
-) -> str:
-    """
-    Extract normalized content.
-    """
 
-    content = turn.get(
-        "content",
-        ""
-    )
+def validate_turn(turn: Mapping[str, Any]) -> bool:
+    return isinstance(turn, Mapping) and bool(get_turn_content(turn))
 
-    return " ".join(
-        str(content).strip().split()
-    )
 
+def is_short_query(query: str, threshold: int = 6) -> bool:
+    return len(normalize_whitespace(query).split()) <= threshold
 
-def validate_turn(
-    turn: Dict[str, Any]
-) -> bool:
-    """
-    Validate conversation turn.
-    """
 
-    if not isinstance(turn, dict):
-        return False
+def extract_numbers(text: str) -> List[str]:
+    return NUMBER_PATTERN.findall(text)
 
-    content = get_turn_content(
-        turn
-    )
 
-    if not content:
-        return False
+def extract_strong_entities_and_codes(text: str) -> List[str]:
+    entities = set()
 
-    return True
+    for match in STRONG_ENTITY_PATTERN.findall(text):
+        entities.add(match.upper())
 
+    for match in LEGAL_REFERENCE_PATTERN.findall(text):
+        entities.add(normalize_whitespace(match).lower())
 
-# =========================================================
-# History Formatting
-# =========================================================
+    if re.search(r"\bhs code\b", text, re.IGNORECASE):
+        entities.add("HS CODE")
 
-def truncate_history(
-    history: List[Dict[str, Any]],
-    max_turns: int | None = None,
-) -> List[Dict[str, Any]]:
-    """
-    Truncate conversation history.
-    """
+    return sorted(entities)
 
-    if (
-        max_turns is None
-        or max_turns <= 0
-    ):
-        return history
 
-    return history[-max_turns * 2 :]
-
-
-def format_turn(
-    turn: Dict[str, Any]
-) -> str:
-    """
-    Format single turn.
-    """
-
-    role = get_turn_role(
-        turn
-    )
-
-    content = get_turn_content(
-        turn
-    )
-
-    return f"{role}: {content}"
-
-
-def format_history_for_rewrite(
-    history: List[Dict[str, Any]],
-    max_turns: int = 3,
-) -> str:
-    """
-    Format selected history
-    for rewrite prompts.
-    """
-
-    if not history:
-        return DEFAULT_EMPTY_HISTORY
-
-    selected = truncate_history(
-        history,
-        max_turns=max_turns,
-    )
-
-    lines = []
-
-    for turn in selected:
-
-        if not validate_turn(turn):
-            continue
-
-        lines.append(
-            format_turn(turn)
-        )
-
-    if not lines:
-        return DEFAULT_EMPTY_HISTORY
-
-    return "\n".join(lines)
-
-
-# =========================================================
-# Regex / Keyword Utilities
-# =========================================================
-
-def contains_pattern(
-    text: str,
-    patterns: List[str]
-) -> bool:
-    """
-    Check regex patterns.
-    """
-
-    for pattern in patterns:
-
-        if re.search(pattern, text):
-            return True
-
-    return False
-
-
-def contains_keyword(
-    text: str,
-    keywords: List[str]
-) -> bool:
-    """
-    Check keyword existence.
-    """
-
-    for keyword in keywords:
-
-        if keyword in text:
-            return True
-
-    return False
-
-
-# =========================================================
-# Query Heuristics
-# =========================================================
-
-def is_short_query(
-    query: str,
-    threshold: int = 6,
-) -> bool:
-    """
-    Short queries are more likely
-    to depend on history.
-    """
-
-    return (
-        len(query.split())
-        <= threshold
-    )
-
-
-def is_long_query(
-    query: str,
-    threshold: int = 18,
-) -> bool:
-    """
-    Long queries are usually
-    standalone enough.
-    """
-
-    return (
-        len(query.split())
-        >= threshold
-    )
-
-
-def has_named_entity(
-    query: str
-) -> bool:
-    """
-    Simple heuristic for detecting
-    capitalized entities.
-    """
-
-    words = query.split()
-
-    capitalized = [
-
-        word
-
-        for word in words
-
-        if len(word) > 1
-        and word[0].isupper()
-    ]
-
-    return len(capitalized) > 0
-
-
-# =========================================================
-# Follow-up Detection
-# =========================================================
-
-def is_likely_follow_up(
-    query: str
-) -> bool:
-    """
-    Determine whether query
-    likely depends on conversation history.
-
-    Strategy:
-        1. Explicit patterns
-        2. Pronoun/reference detection
-        3. Implicit dependency
-        4. Query length heuristics
-        5. Standalone detection
-    """
-
-    query = normalize_text(
-        query
-    )
-
-    if not query:
-        return False
-
-    # =====================================================
-    # Explicit dependency
-    # =====================================================
-
-    if contains_pattern(
-        query,
-        FOLLOW_UP_PATTERNS,
-    ):
+def has_strong_entity_or_code(query: str) -> bool:
+    normalized_query = normalize_whitespace(query)
+    if extract_numbers(normalized_query):
         return True
+    return bool(extract_strong_entities_and_codes(normalized_query))
 
-    # =====================================================
-    # Pronoun/reference dependency
-    # =====================================================
+
+def is_standalone_definition_query(query: str) -> bool:
+    normalized_query = normalize_text(query)
+    return contains_pattern(normalized_query, STANDALONE_PATTERNS)
+
+
+def is_explicit_follow_up(query: str) -> bool:
+    normalized_query = normalize_text(query)
+    patterns = VI_EXPLICIT_FOLLOW_UP_PATTERNS + EN_EXPLICIT_FOLLOW_UP_PATTERNS
+    return contains_pattern(normalized_query, patterns)
+
+
+def has_pronoun_reference_dependency(query: str) -> bool:
+    return contains_keyword(query, PRONOUN_REFERENCE_KEYWORDS)
+
+
+def is_short_ambiguous_query(query: str) -> bool:
+    normalized_query = normalize_text(query)
+    return contains_pattern(normalized_query, SHORT_AMBIGUOUS_PATTERNS)
+
+
+def analyze_query_dependency(query: str, has_history: bool) -> RewriteDecision:
+    normalized_query = normalize_whitespace(query)
+    lowered_query = normalize_text(query)
+
+    if not lowered_query:
+        return RewriteDecision(False, "empty_query", 1.0, "empty")
+
+    if not has_history:
+        query_type = "standalone" if is_standalone_definition_query(normalized_query) else "no_history"
+        return RewriteDecision(False, "no_history", 1.0, query_type)
+
+    if is_standalone_definition_query(normalized_query):
+        return RewriteDecision(False, "standalone_definition", 0.95, "standalone")
+
+    if is_explicit_follow_up(normalized_query):
+        return RewriteDecision(True, "explicit_follow_up", 0.98, "follow_up")
+
+    if has_pronoun_reference_dependency(normalized_query):
+        return RewriteDecision(True, "pronoun_reference", 0.92, "reference")
+
+    if is_short_ambiguous_query(normalized_query) and not has_strong_entity_or_code(normalized_query):
+        return RewriteDecision(True, "short_ambiguous_with_history", 0.88, "ambiguous")
 
     if contains_keyword(
-        query,
-        PRONOUN_KEYWORDS,
+        lowered_query,
+        ("trường hợp này", "trường hợp đó", "xử lý như thế nào", "xử lý thế nào", "nếu"),
     ):
-        return True
+        return RewriteDecision(True, "context_dependent_long_query", 0.86, "context_dependent")
 
-    # =====================================================
-    # Implicit dependency
-    # =====================================================
+    if is_short_query(normalized_query) and not has_strong_entity_or_code(normalized_query):
+        return RewriteDecision(True, "short_query_without_entity", 0.7, "ambiguous")
 
-    if contains_keyword(
-        query,
-        IMPLICIT_DEPENDENCY_KEYWORDS,
-    ):
-        return True
-
-    # =====================================================
-    # Short query heuristic
-    # =====================================================
-
-    if is_short_query(query):
-
-        if not has_named_entity(query):
-            return True
-
-    # =====================================================
-    # Long standalone query
-    # =====================================================
-
-    if is_long_query(query):
-        return False
-
-    # =====================================================
-    # Standalone patterns
-    # =====================================================
-
-    if contains_pattern(
-        query,
-        STANDALONE_PATTERNS,
-    ):
-        return False
-
-    return False
+    return RewriteDecision(False, "standalone_query", 0.75, "standalone")
 
 
-# =========================================================
-# Rewrite Output Cleaning
-# =========================================================
+def is_likely_follow_up(query: str) -> bool:
+    decision = analyze_query_dependency(query, has_history=True)
+    return decision.should_rewrite
 
-def clean_rewritten_query(
-    text: str
-) -> str:
-    """
-    Clean rewritten query output.
-    """
 
+def clean_rewritten_query(text: str) -> str:
     if not text:
         return ""
 
-    cleaned = safe_strip(text)
-
-    cleaned = (
-        cleaned
-        .replace("```", "")
-        .strip()
-    )
-
-    cleaned = (
-        cleaned
-        .splitlines()[0]
-        .strip()
-    )
+    cleaned = safe_strip(text).replace("```", "").strip()
+    cleaned = cleaned.splitlines()[0].strip()
 
     prefixes = [
-
         "rewritten standalone query:",
         "standalone query:",
         "rewritten query:",
+        "rewrite:",
         "query:",
+        "trả lời:",
     ]
 
-    lower_cleaned = (
-        cleaned.lower()
-    )
-
+    lowered = cleaned.lower()
     for prefix in prefixes:
-
-        if lower_cleaned.startswith(
-            prefix
-        ):
-
-            cleaned = cleaned[
-                len(prefix):
-            ].strip()
-
+        if lowered.startswith(prefix):
+            cleaned = cleaned[len(prefix) :].strip()
             break
 
-    cleaned = (
-        cleaned
-        .strip("\"'“”‘’")
-        .strip()
-    )
-
-    return cleaned
+    return cleaned.strip("\"'“”‘’").strip()
 
 
-# =========================================================
-# Rewrite Decision Helpers
-# =========================================================
+def _tokenize_keywords(text: str) -> List[str]:
+    return [
+        token
+        for token in WORD_PATTERN.findall(normalize_text(text))
+        if len(token) >= 4 and not token.isdigit()
+    ]
 
-def should_skip_rewrite(
-    history: List[Dict[str, Any]]
-) -> bool:
-    """
-    Determine whether rewriting
-    should be skipped.
-    """
 
-    if not history:
-        return True
+def validate_rewrite(
+    original_query: str,
+    rewritten_query: str,
+    decision: RewriteDecision,
+    max_rewrite_ratio: float = 2.0,
+    max_tokens_multiplier: int = 20,
+) -> RewriteValidationResult:
+    errors: List[str] = []
 
-    return False
+    original_query = normalize_whitespace(original_query)
+    rewritten_query = normalize_whitespace(rewritten_query)
+
+    if not rewritten_query:
+        errors.append("empty_rewrite")
+        return RewriteValidationResult(False, errors)
+
+    if len(rewritten_query.split()) <= 1:
+        errors.append("rewrite_too_short")
+
+    original_len = max(1, len(original_query.split()))
+    rewritten_len = len(rewritten_query.split())
+    max_allowed = max(max_tokens_multiplier, int(original_len * max_rewrite_ratio))
+    if rewritten_len > max_allowed:
+        errors.append("rewrite_too_long")
+
+    lowered = rewritten_query.lower()
+    if contains_pattern(lowered, ANSWER_STYLE_PATTERNS):
+        errors.append("answer_style_output")
+
+    if rewritten_query.count("?") > 3 or rewritten_query.count("!") > 2:
+        errors.append("excessive_punctuation")
+
+    if re.search(r"\b(\w+)(?:\s+\1){2,}\b", lowered):
+        errors.append("excessive_repetition")
+
+    original_numbers = extract_numbers(original_query)
+    rewritten_numbers = extract_numbers(rewritten_query)
+    for number in original_numbers:
+        if number not in rewritten_numbers:
+            errors.append(f"missing_number:{number}")
+
+    original_entities = extract_strong_entities_and_codes(original_query)
+    rewritten_entities_upper = {entity.upper() for entity in extract_strong_entities_and_codes(rewritten_query)}
+    for entity in original_entities:
+        if entity.upper() not in rewritten_entities_upper:
+            errors.append(f"missing_entity:{entity}")
+
+    strict_preservation = decision.query_type == "standalone"
+    if strict_preservation:
+        original_keywords = set(_tokenize_keywords(original_query))
+        rewritten_keywords = set(_tokenize_keywords(rewritten_query))
+        if len(original_keywords) >= 2:
+            overlap = len(original_keywords & rewritten_keywords) / len(original_keywords)
+            if overlap < 0.3:
+                errors.append("low_keyword_overlap")
+
+    return RewriteValidationResult(not errors, errors)
+
+
+def should_skip_rewrite(history: List[Dict[str, Any]]) -> bool:
+    return not history
