@@ -1,4 +1,7 @@
-from typing import List, Dict, Any
+from __future__ import annotations
+
+import re
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -19,100 +22,80 @@ MEANINGLESS_PATTERNS = {
     "goodbye",
 }
 
+FOLLOWUP_KEYWORDS = (
+    "còn",
+    "vậy",
+    "thế",
+    "nếu",
+    "trường hợp",
+    "thì sao",
+    "cái đó",
+    "việc đó",
+    "như vậy",
+)
+
+DOMAIN_KEYWORDS = (
+    "hải quan",
+    "tờ khai",
+    "kiểm hóa",
+    "chuyển khẩu",
+    "nhập kinh doanh",
+    "sang tải",
+    "pallet",
+    "cửa khẩu",
+    "thông quan",
+)
+
+TECHNICAL_CODE_PATTERN = re.compile(r"\b[A-Z]{1,8}\d{0,4}\b")
+NUMBER_PATTERN = re.compile(r"\d+")
+
+ROLE_LABELS = {
+    "user": "User",
+    "human": "User",
+    "assistant": "Assistant",
+    "ai": "Assistant",
+    "bot": "Assistant",
+    "system": "System",
+}
+
 
 def normalize_text(text: str) -> str:
-    """
-    Normalize text for comparison.
-
-    Args:
-        text:
-            Input text.
-
-    Returns:
-        Normalized text.
-    """
-
     return text.strip().lower()
 
 
-def cosine_similarity(
-    a: np.ndarray,
-    b: np.ndarray
-) -> float:
-    """
-    Compute cosine similarity.
+def get_turn_content(turn: Mapping[str, Any]) -> str:
+    return str(turn.get("content", "")).strip()
 
-    Args:
-        a:
-            First vector.
 
-        b:
-            Second vector.
+def normalize_role(role: Any) -> str:
+    normalized = normalize_text(str(role or "user"))
+    return ROLE_LABELS.get(normalized, normalized.capitalize() or "User")
 
-    Returns:
-        Cosine similarity score.
-    """
 
-    denominator = (
-        np.linalg.norm(a)
-        * np.linalg.norm(b)
-    )
+def cosine_similarity(a: Sequence[float], b: Sequence[float]) -> float:
+    vector_a = np.asarray(a, dtype=float)
+    vector_b = np.asarray(b, dtype=float)
 
+    if vector_a.size == 0 or vector_b.size == 0:
+        return 0.0
+
+    denominator = np.linalg.norm(vector_a) * np.linalg.norm(vector_b)
     if denominator == 0:
         return 0.0
 
-    return float(
-        np.dot(a, b) / denominator
-    )
+    return float(np.dot(vector_a, vector_b) / denominator)
 
 
-def get_turn_content(
-    turn: Dict[str, Any]
-) -> str:
-    """
-    Safely extract turn content.
-
-    Args:
-        turn:
-            Conversation turn.
-
-    Returns:
-        Content string.
-    """
-
-    return str(
-        turn.get("content", "")
-    ).strip()
+def contains_keyword(text: str, keywords: Iterable[str]) -> bool:
+    return any(keyword in text for keyword in keywords)
 
 
 def is_meaningful_turn(
-    turn: Dict[str, Any],
-    min_words: int = 3
+    turn: Mapping[str, Any],
+    min_words: int = 3,
 ) -> bool:
-    """
-    Determine whether a conversation turn
-    is meaningful for query rewriting.
-
-    Examples of meaningless turns:
-        - hi
-        - hello
-        - ok
-        - thank you
-
-    Args:
-        turn:
-            Conversation turn.
-
-        min_words:
-            Minimum number of words required.
-
-    Returns:
-        True if meaningful.
-    """
-
-    content = normalize_text(
-        get_turn_content(turn)
-    )
+    raw_content = get_turn_content(turn)
+    content = normalize_text(raw_content)
 
     if not content:
         return False
@@ -120,107 +103,110 @@ def is_meaningful_turn(
     if content in MEANINGLESS_PATTERNS:
         return False
 
-    if len(content.split()) < min_words:
-        return False
+    if "?" in raw_content:
+        return True
 
-    return True
+    if NUMBER_PATTERN.search(content):
+        return True
+
+    if TECHNICAL_CODE_PATTERN.search(raw_content.upper()):
+        return True
+
+    if contains_keyword(content, FOLLOWUP_KEYWORDS):
+        return True
+
+    if contains_keyword(content, DOMAIN_KEYWORDS):
+        return True
+
+    return len(content.split()) >= min_words
 
 
 def filter_meaningful_history(
-    history: List[Dict[str, Any]]
+    history: List[Dict[str, Any]],
+    min_words: int = 3,
 ) -> List[Dict[str, Any]]:
-    """
-    Remove meaningless conversation turns.
-
-    Args:
-        history:
-            Full conversation history.
-
-    Returns:
-        Filtered history.
-    """
-
     return [
         turn
         for turn in history
-        if is_meaningful_turn(turn)
+        if is_meaningful_turn(turn, min_words=min_words)
     ]
 
 
-def compute_recency_score(
-    index: int,
-    total_turns: int
-) -> float:
-    """
-    Compute normalized recency score.
+def annotate_history(
+    history: List[Dict[str, Any]],
+    min_words: int = 3,
+) -> List[Tuple[int, Dict[str, Any]]]:
+    return [
+        (index, turn)
+        for index, turn in enumerate(history)
+        if is_meaningful_turn(turn, min_words=min_words)
+    ]
 
-    More recent turns receive higher scores.
 
-    Args:
-        index:
-            Turn index.
-
-        total_turns:
-            Total number of turns.
-
-    Returns:
-        Recency score in range [0, 1].
-    """
-
+def compute_recency_score(index: int, total_turns: int) -> float:
     if total_turns <= 0:
         return 0.0
 
-    return (index + 1) / total_turns
+    return float(index + 1) / float(total_turns)
 
 
-def rank_by_recency(
-    history: List[Dict[str, Any]]
-) -> List[Dict[str, Any]]:
-    """
-    Rank history by recency.
-
-    Most recent turns come first.
-
-    Args:
-        history:
-            Conversation history.
-
-    Returns:
-        Ranked history.
-    """
-
+def rank_by_recency(history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return history[::-1]
 
 
 def format_history(
-    history: List[Dict[str, Any]]
+    history: List[Dict[str, Any]],
+    max_chars: Optional[int] = None,
 ) -> str:
-    """
-    Format history for prompts.
-
-    Args:
-        history:
-            Selected history turns.
-
-    Returns:
-        Formatted string.
-    """
-
     if not history:
         return "No previous conversation."
 
-    lines = []
+    lines: List[str] = []
+    current_length = 0
 
     for turn in history:
+        line = f"{normalize_role(turn.get('role'))}: {get_turn_content(turn)}"
+        line_length = len(line) + (1 if lines else 0)
 
-        role = str(
-            turn.get("role", "user")
-        ).capitalize()
+        if max_chars is not None and max_chars >= 0 and current_length + line_length > max_chars:
+            if not lines:
+                truncated = line[:max_chars].rstrip()
+                return truncated or "No previous conversation."
+            break
 
-        content = get_turn_content(turn)
-
-        lines.append(
-            f"{role}: {content}"
-        )
+        lines.append(line)
+        current_length += line_length
 
     return "\n".join(lines)
+
+
+def extract_query_from_state(state: Mapping[str, Any]) -> str:
+    for key in ("rewritten_query", "query", "question"):
+        value = state.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def build_selection_metadata(
+    strategy: str,
+    top_k: int,
+    num_input_history: int,
+    num_meaningful_history: int,
+    num_selected: int,
+    alpha: Optional[float] = None,
+    beta: Optional[float] = None,
+    recent_window: Optional[int] = None,
+    selected_scores: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    return {
+        "strategy": strategy,
+        "top_k": int(top_k),
+        "alpha": None if alpha is None else float(alpha),
+        "beta": None if beta is None else float(beta),
+        "recent_window": None if recent_window is None else int(recent_window),
+        "num_input_history": int(num_input_history),
+        "num_meaningful_history": int(num_meaningful_history),
+        "num_selected": int(num_selected),
+        "selected_scores": selected_scores or [],
+    }

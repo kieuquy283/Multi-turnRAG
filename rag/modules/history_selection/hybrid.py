@@ -1,204 +1,165 @@
-from typing import Dict, Any, List
+from __future__ import annotations
 
-from .base import BaseHistorySelector
+from typing import Any, Dict, List, Sequence, Tuple
 
+from .base import RecencyHistorySelector
 from .utils import (
-    filter_meaningful_history,
+    build_selection_metadata,
     compute_recency_score,
     cosine_similarity,
+    extract_query_from_state,
     get_turn_content,
 )
 
 
-class HybridHistorySelector(
-    BaseHistorySelector
-):
-    """
-    Hybrid history selector.
+ScoredTurn = Dict[str, Any]
 
-    Strategy:
-        1. Remove meaningless turns
-        2. Compute semantic similarity
-        3. Compute recency score
-        4. Combine scores
-        5. Select top-k relevant turns
-    """
+
+class HybridHistorySelector(RecencyHistorySelector):
+    strategy = "hybrid"
 
     def __init__(
         self,
-        embedding_model,
+        embedding_model: Any,
         top_k: int = 3,
         alpha: float = 0.8,
         beta: float = 0.2,
-        recent_window: int = 20
+        recent_window: int = 20,
     ):
+        super().__init__(top_k=top_k)
 
-        super().__init__(top_k)
+        if recent_window <= 0:
+            raise ValueError("recent_window must be > 0")
+        if alpha + beta <= 0:
+            raise ValueError("alpha + beta must be > 0")
 
-        self.embedding_model = (
-            embedding_model
-        )
+        total = alpha + beta
+        self.embedding_model = embedding_model
+        self.alpha = float(alpha) / float(total)
+        self.beta = float(beta) / float(total)
+        self.recent_window = int(recent_window)
 
-        self.alpha = alpha
-        self.beta = beta
-
-        self.recent_window = (
-            recent_window
-        )
+    def _embed_history_contents(self, contents: List[str]) -> List[Sequence[float]]:
+        embed_documents = getattr(self.embedding_model, "embed_documents", None)
+        if callable(embed_documents):
+            return list(embed_documents(contents))
+        return [self.embedding_model.embed_query(content) for content in contents]
 
     def rank_history(
         self,
         query: str,
-        history: List[Dict[str, Any]]
-    ):
-        """
-        Rank history using:
-            semantic similarity + recency.
+        history: List[Dict[str, Any]],
+    ) -> Tuple[List[Tuple[int, Dict[str, Any]]], List[ScoredTurn]]:
+        meaningful_history = self.get_meaningful_history(history)
+        recent_history = meaningful_history[-self.recent_window :]
 
-        Returns:
-            List[(turn, score)]
-        """
+        if not recent_history or not query.strip():
+            return meaningful_history, []
 
-        meaningful_history = (
-            filter_meaningful_history(
-                history
-            )
-        )
+        query_embedding = self.embedding_model.embed_query(query)
+        contents = [get_turn_content(turn) for _, turn in recent_history]
+        history_embeddings = self._embed_history_contents(contents)
+        total_turns = len(recent_history)
 
-        meaningful_history = (
-            meaningful_history[
-                -self.recent_window :
-            ]
-        )
+        scored_history: List[ScoredTurn] = []
 
-        if not meaningful_history:
-            return []
-
-        query_embedding = (
-            self.embedding_model
-            .embed_query(query)
-        )
-
-        scored_history = []
-
-        total_turns = len(
-            meaningful_history
-        )
-
-        for idx, turn in enumerate(
-            meaningful_history
+        for recency_index, ((original_index, turn), turn_embedding) in enumerate(
+            zip(recent_history, history_embeddings)
         ):
-
-            content = (
-                get_turn_content(turn)
-            )
-
-            turn_embedding = (
-                self.embedding_model
-                .embed_query(content)
-            )
-
-            semantic_score = (
-                cosine_similarity(
-                    query_embedding,
-                    turn_embedding
-                )
-            )
-
-            recency_score = (
-                compute_recency_score(
-                    idx,
-                    total_turns
-                )
-            )
-
-            final_score = (
-                self.alpha
-                * semantic_score
-                +
-                self.beta
-                * recency_score
-            )
+            semantic_score = cosine_similarity(query_embedding, turn_embedding)
+            recency_score = compute_recency_score(recency_index, total_turns)
+            final_score = (self.alpha * semantic_score) + (self.beta * recency_score)
 
             scored_history.append(
-                (
-                    turn,
-                    final_score
-                )
+                {
+                    "original_index": int(original_index),
+                    "role": str(turn.get("role", "")),
+                    "content": str(turn.get("content", "")),
+                    "semantic_score": float(semantic_score),
+                    "recency_score": float(recency_score),
+                    "final_score": float(final_score),
+                    "turn": turn,
+                }
             )
 
-        scored_history.sort(
-            key=lambda x: x[1],
-            reverse=True
-        )
+        scored_history.sort(key=lambda item: item["final_score"], reverse=True)
+        return meaningful_history, scored_history
 
-        return scored_history
+    def score_history(
+        self,
+        query: str,
+        history: List[Dict[str, Any]],
+    ) -> Tuple[List[Tuple[int, Dict[str, Any]]], List[ScoredTurn]]:
+        meaningful_history, ranked_history = self.rank_history(query, history)
+        selected = ranked_history[: self.top_k]
+        selected.sort(key=lambda item: item["original_index"])
+
+        selected_scores: List[ScoredTurn] = []
+        for item in selected:
+            selected_scores.append(
+                {
+                    "original_index": int(item["original_index"]),
+                    "role": str(item["role"]),
+                    "content": str(item["content"]),
+                    "semantic_score": float(item["semantic_score"]),
+                    "recency_score": float(item["recency_score"]),
+                    "final_score": float(item["final_score"]),
+                }
+            )
+
+        return meaningful_history, selected_scores
 
     def select(
         self,
         query: str,
-        history: List[Dict[str, Any]]
+        history: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
-        """
-        Select top-k ranked history.
-        """
+        _, selected_scores = self.score_history(query, history)
+        return [history[item["original_index"]] for item in selected_scores]
 
-        ranked_history = (
-            self.rank_history(
-                query,
-                history
-            )
+    def run(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        history = state.get("history", []) or []
+        query = extract_query_from_state(state)
+        meaningful_history, selected_scores = self.score_history(query, history)
+        selected_history = [history[item["original_index"]] for item in selected_scores]
+
+        state["selected_history"] = selected_history
+        state["history_selection"] = build_selection_metadata(
+            strategy=self.strategy,
+            top_k=self.top_k,
+            alpha=self.alpha,
+            beta=self.beta,
+            recent_window=self.recent_window,
+            num_input_history=len(history),
+            num_meaningful_history=len(meaningful_history),
+            num_selected=len(selected_history),
+            selected_scores=selected_scores,
         )
-
-        selected = [
-
-            turn
-
-            for turn, score
-            in ranked_history[
-                : self.top_k * 2
-            ]
-        ]
-
-        return selected
-
-    def run(
-        self,
-        state: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Run hybrid history selection.
-        """
-
-        query = state.get(
-            "query",
-            ""
-        )
-
-        history = state.get(
-            "history",
-            []
-        )
-
-        selected_history = (
-            self.select(
-                query,
-                history
-            )
-        )
-
-        state[
-            "selected_history"
-        ] = selected_history
-
         return state
 
-    def __repr__(self):
-
+    def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}("
             f"top_k={self.top_k}, "
             f"alpha={self.alpha}, "
-            f"beta={self.beta}"
-            f")"
+            f"beta={self.beta}, "
+            f"recent_window={self.recent_window})"
+        )
+
+
+class SemanticHistorySelector(HybridHistorySelector):
+    strategy = "semantic"
+
+    def __init__(
+        self,
+        embedding_model: Any,
+        top_k: int = 3,
+        recent_window: int = 20,
+    ):
+        super().__init__(
+            embedding_model=embedding_model,
+            top_k=top_k,
+            alpha=1.0,
+            beta=0.0,
+            recent_window=recent_window,
         )
