@@ -64,3 +64,5 @@
 2026-04-14 12:04:56,458 | INFO | rag.ingestion.indexing | Embedding batch 200 -> 300/55953
 2026-04-14 12:05:29,654 | INFO | rag.ingestion.indexing | Embedding batch 300 -> 400/55953
 2026-04-14 12:06:13,259 | INFO | rag.ingestion.indexing | Embedding batch 400 -> 500/55953
+2026-05-20 00:40:59,796 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 199/199
+2026-05-20 00:41:34,494 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=data/legal_corpus_chunks.json, chunks=199, index_dir=indexes/legal

@@ -311,6 +311,21 @@ python -m scripts.evaluate_model_7_full_pipeline \
   --output-path logs/eval_runs/model_7_full_pipeline_legal.json
 ```
 
+### Model 8: HyDE + Hybrid Retrieval + Reranking
+
+Model 8 generates a hypothetical legal passage from the rewritten query, uses it as an expanded retrieval query together with the rewritten query, retrieves evidence with hybrid retrieval, fuses candidates, and reranks them before selecting final top-k. It is used to test whether HyDE improves the full modular retrieval pipeline.
+
+```bash
+python -m scripts.evaluate_model_8_hyde \
+  --eval-path data/multiturn_evaluation_legal.json \
+  --index-dir indexes/legal \
+  --corpus-path data/legal_corpus_chunks.json \
+  --top-k 5 \
+  --candidate-k 40 \
+  --history-top-k 4 \
+  --output-path logs/eval_runs/model_8_hyde_legal_top5.json
+```
+
 ### Preparing Legal_Dataset_V1
 
 ```bash
