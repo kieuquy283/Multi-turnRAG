@@ -36,6 +36,33 @@
             }
           ]
         }
+      },
+      {
+        "role": "user",
+        "content": "Đất của tôi đang trong diện giải tỏa nhưng tôi đang thế chấp đất thì tôi có nhận được tiền giải tỏa không",
+        "time": "05:56 PM",
+        "metadata": null
+      },
+      {
+        "role": "assistant",
+        "content": "### PHẢN HỒI VỀ YÊU CẦU TRA CỨU PHÁP LÝ\n\n**Vấn đề tra cứu:** *“Đất của tôi đang trong diện giải tỏa nhưng tôi đang thế chấp đất thì tôi có nhận được tiền giải tỏa không?”*\n\n---\n\n#### 1. Kết quả rà soát dữ liệu  \nSau khi tiến hành kiểm tra hệ thống tài liệu được cung cấp (bao gồm: Nghị định 121/2026/NĐ-CP, Thông tư 30/2025/TT-BTP, Nghị định 109/2026/NĐ-CP, Nghị định 14/2026/NĐ-CP, Nghị định 108/2026/NĐ-CP), chúng tôi ghi nhận kết quả như sau:  \n* Các văn bản nêu trên **không đề cập** đến vấn đề **giải tỏa đất đang thế chấp**, cũng như không quy định về **cơ chế phân phối tiền bồi thường, hỗ trợ khi đất bị thu hồi trong trường hợp có giao dịch bảo đảm (thế chấp)**.  \n* **Không có quy định** về quyền và nghĩa vụ của chủ sở hữu đất, tổ chức tín dụng hoặc bên nhận thế chấp khi tài sản bảo đảm bị Nhà nước thu hồi vì mục đích công cộng.\n\n#### 2. Kết luận từ nguồn tài liệu (Context)  \nDo giới hạn thông tin của nguồn dữ liệu được cung cấp, chúng tôi chưa thể đưa ra câu trả lời chính xác cho câu hỏi của bạn dựa trên các tài liệu này.\n\n#### 3. Hướng dẫn tham khảo thêm  \nĐể có thông tin giải đáp đầy đủ và chính xác nhất cho trường hợp này, bạn nên tham khảo thêm các văn bản pháp luật chuyên ngành có liên quan trực tiếp, ví dụ:  \n- **Luật Đất đai 2013** (được sửa đổi, bổ sung bởi Luật số 12/2024/QH15);  \n- **Nghị định số 47/2014/NĐ-CP** ngày 15/5/2014 về bồi thường, hỗ trợ và tái định cư khi Nhà nước thu hồi đất;  \n- **Luật Các giao dịch bảo đảm năm 2016**, đặc biệt là các điều liên quan đến xử lý tài sản bảo đảm khi bị thu hồi (Điều 29, Điều 30, Điều 33);  \n- **Thông tư liên tịch số 09/2016/TTLT-BTP-BTNMT** hướng dẫn chi tiết một số điều của Luật Đất đai và Luật Các giao dịch bảo đảm về xử lý tài sản bảo đảm là bất động sản khi bị thu hồi.",
+        "time": "05:56 PM",
+        "metadata": {
+          "rewritten_query": "Đất của tôi đang trong diện giải tỏa nhưng tôi đang thế chấp đất thì tôi có nhận được tiền giải tỏa không",
+          "used_rewrite": false,
+          "show_rewritten_query": true,
+          "grounded": true,
+          "warning": "",
+          "mode": "grounded",
+          "top_files": [
+            {
+              "source_file": "data\\DataSetRAG.json",
+              "best_score": 1000000000,
+              "avg_score": 1000000000,
+              "hits": 5
+            }
+          ]
+        }
       }
     ]
   },

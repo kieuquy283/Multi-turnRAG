@@ -5,7 +5,7 @@ import os
 from rag.config.settings import resolve_project_path
 
 
-TOP_K = int(os.getenv("TOP_K", 5))
+TOP_K = int(os.getenv("TOP_K", 3))
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 1000))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 200))
 HISTORY_TURNS = int(os.getenv("HISTORY_TURNS", 3))

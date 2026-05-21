@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, List
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -35,6 +36,7 @@ class ChatSession(BaseModel):
 class ChatRequest(BaseModel):
     question: str
     history: list[dict] = []
+    stream: bool = False
 
 
 class ChatResponse(BaseModel):
@@ -199,13 +201,37 @@ def evaluate_multiturn(eval_path: str, index_dir: str, top_k: int = 10, use_rewr
     )
 
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat")
 def chat(request: ChatRequest) -> Any:
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    result = pipeline.chat(question=request.question, history=request.history)
-    return result
+    if request.stream:
+        import json
+        if hasattr(pipeline, "chat_stream"):
+            metadata, stream = pipeline.chat_stream(
+                question=request.question,
+                history=request.history,
+            )
+        else:
+            result = pipeline.chat(question=request.question, history=request.history)
+            def single_chunk_generator():
+                yield f"data: {json.dumps({'event': 'metadata', 'data': result})}\n\n"
+                yield f"data: {json.dumps({'event': 'token', 'data': result['answer']})}\n\n"
+                yield "data: [DONE]\n\n"
+            return StreamingResponse(single_chunk_generator(), media_type="text/event-stream")
+
+        def event_generator():
+            yield f"data: {json.dumps({'event': 'metadata', 'data': metadata})}\n\n"
+            for chunk in stream:
+                token = getattr(chunk, "content", chunk)
+                yield f"data: {json.dumps({'event': 'token', 'data': token})}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
+    else:
+        result = pipeline.chat(question=request.question, history=request.history)
+        return result
 
 
 @app.get("/evaluation", response_model=EvaluationResponse)

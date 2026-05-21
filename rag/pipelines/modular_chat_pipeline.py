@@ -137,6 +137,54 @@ class ModularChatPipeline:
             "pipeline_state": state,
         }
 
+    def chat_stream(
+        self,
+        question: str,
+        history: List[Dict[str, Any]],
+    ):
+        if not question or not question.strip():
+            raise ValueError("Question rỗng.")
+
+        state: Dict[str, Any] = {
+            "question": question,
+            "query": question,
+            "history": history,
+        }
+
+        state = self.history_selector.run(state)
+        state = self.query_rewriter.run(state)
+        state = self.retriever.run(state)
+        state = self.reranker.run(state)
+
+        rewritten_query = str(state.get("rewritten_query") or question).strip()
+        used_rewrite = bool(state.get("rewrite_applied", rewritten_query != question.strip()))
+
+        retrieval_results = state.get("reranked_results") or state.get("retrieval_results") or []
+        docs = self._results_to_documents(retrieval_results)
+        top_files = build_top_files(docs, top_k_files=3)
+
+        from rag.generation.answering import stream_answer_with_context_policy
+        metadata, stream = stream_answer_with_context_policy(
+            question=question,
+            rewritten_query=rewritten_query,
+            docs=docs,
+            history=history,
+        )
+
+        full_metadata = {
+            "rewritten_query": rewritten_query,
+            "used_rewrite": used_rewrite,
+            "show_rewritten_query": self.show_rewritten_query,
+            "grounded": metadata["grounded"],
+            "warning": metadata["warning"],
+            "mode": metadata["mode"],
+            "top_files": top_files,
+        }
+
+        return full_metadata, stream
+
+
+
 
 class LegacyCompatibleModularChatPipeline(ModularChatPipeline):
     """

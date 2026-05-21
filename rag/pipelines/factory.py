@@ -4,7 +4,7 @@ import os
 from importlib import import_module
 from typing import Any
 
-DEFAULT_CHAT_PIPELINE_MODE = "legacy"
+DEFAULT_CHAT_PIPELINE_MODE = "modular"
 SUPPORTED_CHAT_PIPELINE_MODES = {"legacy", "modular"}
 
 

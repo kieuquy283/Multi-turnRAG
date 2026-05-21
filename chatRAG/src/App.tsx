@@ -144,7 +144,7 @@ function App() {
     }
   };
 
-  const updateCurrentSessionMessages = (updatedMessages: Message[]) => {
+  const updateCurrentSessionMessages = (updatedMessages: Message[], persist = true) => {
     setMessages(updatedMessages);
     const updatedSessions = sessions.map((session) => {
       if (session.id !== activeSessionId) return session;
@@ -158,7 +158,11 @@ function App() {
       }
       return updatedSession;
     });
-    persistSessions(updatedSessions);
+    if (persist) {
+      persistSessions(updatedSessions);
+    } else {
+      setSessions(updatedSessions);
+    }
   };
 
   useEffect(() => {
@@ -193,17 +197,23 @@ function App() {
     const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const userMessage: Message = { role: "user", content: trimmed, time: timestamp };
     const updatedMessages = [...messages, userMessage];
-    updateCurrentSessionMessages(updatedMessages);
+    updateCurrentSessionMessages(updatedMessages, false);
     setQuestion("");
     setLoading(true);
 
     try {
+      const historyLimit = 10;
+      const condensedHistory = updatedMessages.slice(-historyLimit).map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
       const response = await fetch("http://127.0.0.1:8000/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question: trimmed, history: updatedMessages }),
+        body: JSON.stringify({ question: trimmed, history: condensedHistory, stream: true }),
       });
 
       if (!response.ok) {
@@ -211,24 +221,76 @@ function App() {
         throw new Error(errorData.detail || "API error");
       }
 
-      const data = (await response.json()) as ChatResponse;
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let done = false;
+      let assistantAnswer = "";
+      let metadata: any = null;
+      let buffer = "";
+
+      const initialAssistantMessage: Message = {
+        role: "assistant",
+        content: "",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages([...updatedMessages, initialAssistantMessage]);
+
+      while (!done && reader) {
+        const { value, done: readDone } = await reader.read();
+        done = readDone;
+        if (value) {
+          buffer += decoder.decode(value, { stream: !done });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith("data: ")) {
+              const dataStr = trimmedLine.slice(6).trim();
+              if (dataStr === "[DONE]") {
+                break;
+              }
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.event === "metadata") {
+                  metadata = parsed.data;
+                } else if (parsed.event === "token") {
+                  assistantAnswer += parsed.data;
+                  setMessages([
+                    ...updatedMessages,
+                    {
+                      role: "assistant",
+                      content: assistantAnswer,
+                      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                      metadata: metadata || undefined,
+                    },
+                  ]);
+                }
+              } catch (e) {
+                // ignore JSON parse errors for incomplete packets
+              }
+            }
+          }
+        }
+      }
+
       const answerTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.answer,
+        content: assistantAnswer,
         time: answerTime,
-        metadata: {
-          rewritten_query: data.rewritten_query,
-          used_rewrite: data.used_rewrite,
-          show_rewritten_query: data.show_rewritten_query,
-          grounded: data.grounded,
-          warning: data.warning,
-          mode: data.mode,
-          top_files: data.top_files,
-        },
+        metadata: metadata ? {
+          rewritten_query: metadata.rewritten_query,
+          used_rewrite: metadata.used_rewrite,
+          show_rewritten_query: metadata.show_rewritten_query,
+          grounded: metadata.grounded,
+          warning: metadata.warning,
+          mode: metadata.mode,
+          top_files: metadata.top_files,
+        } : undefined,
       };
       const updatedMessagesWithAnswer = [...updatedMessages, assistantMessage];
-      updateCurrentSessionMessages(updatedMessagesWithAnswer);
+      updateCurrentSessionMessages(updatedMessagesWithAnswer, true);
     } catch (err) {
       const errorMessage = (err as Error).message;
       const errorMessageText = `Lỗi: ${errorMessage}`;
@@ -238,7 +300,7 @@ function App() {
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       const updatedMessagesWithError = [...updatedMessages, errorMessageEntry];
-      updateCurrentSessionMessages(updatedMessagesWithError);
+      updateCurrentSessionMessages(updatedMessagesWithError, true);
     } finally {
       setLoading(false);
     }

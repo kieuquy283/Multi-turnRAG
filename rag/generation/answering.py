@@ -81,3 +81,47 @@ def answer_with_context_policy(
         "grounded": True,
         "warning": "",
     }
+
+
+def stream_answer_with_context_policy(
+    question: str,
+    rewritten_query: str,
+    docs: List[Any],
+    history: List[Dict[str, Any]],
+):
+    """
+    Chính sách trả lời dạng luồng (SSE):
+    - Xác định mode và prompt trước khi gọi LLM.
+    - Trả về dictionary metadata và generator stream các token.
+    """
+    if not docs:
+        fallback_prompt = build_fallback_prompt(
+            question=question,
+            history=history,
+        )
+        warning = (
+            "⚠️ Cảnh báo: Hệ thống không tìm thấy tài liệu liên quan trong kho tri thức. "
+            "Câu trả lời dưới đây được sinh bởi LLM, không dựa trên tài liệu nội bộ."
+        )
+        metadata = {
+            "mode": "fallback_no_docs",
+            "grounded": False,
+            "warning": warning,
+        }
+        prompt = fallback_prompt
+    else:
+        grounded_prompt = build_answer_prompt(
+            current_question=question,
+            rewritten_query=rewritten_query,
+            docs=docs,
+            history=history,
+        )
+        metadata = {
+            "mode": "grounded",
+            "grounded": True,
+            "warning": "",
+        }
+        prompt = grounded_prompt
+
+    llm = get_llm()
+    return metadata, llm.stream(prompt)

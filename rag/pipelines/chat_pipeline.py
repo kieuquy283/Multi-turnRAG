@@ -81,3 +81,57 @@ class ChatPipeline:
             "top_files": top_files,
             "history": history,
         }
+
+    def chat_stream(
+        self,
+        question: str,
+        history: List[Dict[str, Any]],
+    ):
+        if not question or not question.strip():
+            raise ValueError("Question rỗng.")
+
+        # 1) Rewrite query
+        if not history:
+            rewritten_query = question
+            used_rewrite = False
+        else:
+            rewritten_query = rewrite_query(
+                current_question=question,
+                history=history,
+            )
+            used_rewrite = rewritten_query.strip() != question.strip()
+
+        # 2) Retrieve docs
+        docs = retrieve_documents(
+            query=rewritten_query,
+            vectorstore=self.vectorstore,
+            top_k=TOP_K,
+        )
+
+        # 3) Filter active docs
+        docs = filter_active_docs(docs, top_k=TOP_K)
+
+        # 4) Build top files
+        top_files = build_top_files(docs, top_k_files=3)
+
+        # 5) Answer with policy stream
+        from rag.generation.answering import stream_answer_with_context_policy
+        metadata, stream = stream_answer_with_context_policy(
+            question=question,
+            rewritten_query=rewritten_query,
+            docs=docs,
+            history=history,
+        )
+
+        full_metadata = {
+            "rewritten_query": rewritten_query,
+            "used_rewrite": used_rewrite,
+            "show_rewritten_query": SHOW_REWRITTEN_QUERY,
+            "grounded": metadata["grounded"],
+            "warning": metadata["warning"],
+            "mode": metadata["mode"],
+            "top_files": top_files,
+        }
+
+        return full_metadata, stream
+
