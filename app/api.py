@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import os
+import time
 from pathlib import Path
+from threading import Lock
 from typing import Any, List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -88,6 +91,14 @@ pipeline = build_chat_pipeline(index_dir=str(selected_index_dir))
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SESSION_FILE_PATH = ROOT_DIR / "data" / "chat_sessions.json"
+EVALUATION_CACHE_TTL_SECONDS = int(os.getenv("EVALUATION_CACHE_TTL_SECONDS", "900"))
+
+_evaluation_cache_lock = Lock()
+_evaluation_cache: dict[str, Any] = {
+    "updated_at": 0.0,
+    "key": None,
+    "response": None,
+}
 
 
 def load_chat_sessions() -> list[Any]:
@@ -110,12 +121,16 @@ def save_sessions(sessions: list[ChatSession]) -> list[ChatSession]:
     return sessions
 
 
-def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> EvaluationStats:
+def evaluate_single_turn(
+    eval_path: str,
+    vectorstore: Any,
+    top_k: int = 10,
+    max_samples: int | None = None,
+) -> EvaluationStats:
     data = load_json(eval_path, [])
     if not isinstance(data, list) or not data:
         raise ValueError(f"Evaluation data is missing or invalid: {eval_path}")
 
-    vectorstore = load_vectorstore(index_dir=index_dir)
     total = 0
     total_hit = 0.0
     total_recall = 0.0
@@ -139,6 +154,8 @@ def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> Eva
         total_hit += float(hit)
         total_recall += float(recall)
         total_mrr += float(mrr)
+        if max_samples is not None and total >= max_samples:
+            break
 
     if total == 0:
         raise ValueError(f"No valid evaluation samples found in: {eval_path}")
@@ -154,12 +171,17 @@ def evaluate_single_turn(eval_path: str, index_dir: str, top_k: int = 10) -> Eva
     )
 
 
-def evaluate_multiturn(eval_path: str, index_dir: str, top_k: int = 10, use_rewrite: bool = True) -> EvaluationStats:
+def evaluate_multiturn(
+    eval_path: str,
+    vectorstore: Any,
+    top_k: int = 10,
+    use_rewrite: bool = True,
+    max_samples: int | None = None,
+) -> EvaluationStats:
     data = load_json(eval_path, [])
     if not isinstance(data, list) or not data:
         raise ValueError(f"Evaluation data is missing or invalid: {eval_path}")
 
-    vectorstore = load_vectorstore(index_dir=index_dir)
     total = 0
     total_hit = 0.0
     total_recall = 0.0
@@ -185,6 +207,8 @@ def evaluate_multiturn(eval_path: str, index_dir: str, top_k: int = 10, use_rewr
         total_hit += float(hit)
         total_recall += float(recall)
         total_mrr += float(mrr)
+        if max_samples is not None and total >= max_samples:
+            break
 
     if total == 0:
         raise ValueError(f"No valid evaluation samples found in: {eval_path}")
@@ -235,30 +259,61 @@ def chat(request: ChatRequest) -> Any:
 
 
 @app.get("/evaluation", response_model=EvaluationResponse)
-def get_evaluation() -> EvaluationResponse:
+def get_evaluation(
+    force_refresh: bool = Query(default=False),
+    top_k: int = Query(default=10, ge=1, le=50),
+    include_rewrite: bool = Query(default=True),
+    max_samples: int | None = Query(default=None, ge=1),
+) -> EvaluationResponse:
     index_dir = str(selected_index_dir)
+
+    cache_key = (index_dir, top_k, include_rewrite, max_samples)
+    now = time.time()
+
+    with _evaluation_cache_lock:
+        is_cache_valid = (
+            not force_refresh
+            and _evaluation_cache.get("response") is not None
+            and _evaluation_cache.get("key") == cache_key
+            and (now - float(_evaluation_cache.get("updated_at", 0.0))) <= EVALUATION_CACHE_TTL_SECONDS
+        )
+        if is_cache_valid:
+            return _evaluation_cache["response"]
+
     try:
+        vectorstore = load_vectorstore(index_dir=index_dir)
         single = evaluate_single_turn(
             eval_path="data/evaluation.json",
-            index_dir=index_dir,
-            top_k=10,
+            vectorstore=vectorstore,
+            top_k=top_k,
+            max_samples=max_samples,
         )
         multiturn_no_rewrite = evaluate_multiturn(
             eval_path="data/multiturn_evaluation_filled.json",
-            index_dir=index_dir,
-            top_k=10,
+            vectorstore=vectorstore,
+            top_k=top_k,
             use_rewrite=False,
+            max_samples=max_samples,
         )
-        multiturn_rewrite = evaluate_multiturn(
-            eval_path="data/multiturn_evaluation_filled.json",
-            index_dir=index_dir,
-            top_k=10,
-            use_rewrite=True,
-        )
+        results = [single, multiturn_no_rewrite]
+        if include_rewrite:
+            multiturn_rewrite = evaluate_multiturn(
+                eval_path="data/multiturn_evaluation_filled.json",
+                vectorstore=vectorstore,
+                top_k=top_k,
+                use_rewrite=True,
+                max_samples=max_samples,
+            )
+            results.append(multiturn_rewrite)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
-    return EvaluationResponse(results=[single, multiturn_no_rewrite, multiturn_rewrite])
+    response = EvaluationResponse(results=results)
+    with _evaluation_cache_lock:
+        _evaluation_cache["updated_at"] = now
+        _evaluation_cache["key"] = cache_key
+        _evaluation_cache["response"] = response
+    return response
 
 
 if __name__ == "__main__":

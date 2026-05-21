@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from functools import lru_cache
+
 from langchain_openai import ChatOpenAI
 
 from rag.config.llm import (
@@ -23,14 +25,25 @@ def get_llm(
     - get_llm(model="qwen-plus")
     - get_llm(model_name="qwen-plus")
     """
+    selected_model = model_name or model or CHAT_MODEL
+    selected_temperature = float(TEMPERATURE if temperature is None else temperature)
+
+    return _get_cached_llm(
+        model_name=selected_model,
+        temperature=selected_temperature,
+    )
+
+
+@lru_cache(maxsize=16)
+def _get_cached_llm(
+    model_name: str,
+    temperature: float,
+) -> ChatOpenAI:
     validate_llm_config()
 
-    selected_model = model_name or model or CHAT_MODEL
-    selected_temperature = TEMPERATURE if temperature is None else temperature
-
     return ChatOpenAI(
-        model=selected_model,
+        model=model_name,
         api_key=DASHSCOPE_API_KEY,
         base_url=QWEN_BASE_URL,
-        temperature=selected_temperature,
+        temperature=temperature,
     )

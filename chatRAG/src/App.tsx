@@ -1,5 +1,5 @@
 import { FormEvent, MouseEvent, useEffect, useState } from "react";
-import { ChatSession, Message, TabKey, TopFileInfo, ChatResponse, EvaluationResponse, EvaluationStats } from "./types";
+import { ChatSession, Message, TabKey, TopFileInfo, EvaluationResponse, EvaluationStats } from "./types";
 import Sidebar from "./components/Sidebar";
 import ChatScreen from "./components/ChatScreen";
 import EvaluationScreen from "./components/EvaluationScreen";
@@ -306,12 +306,15 @@ function App() {
     }
   };
 
-  const fetchEvaluation = async () => {
+  const fetchEvaluation = async (forceRefresh = false) => {
     setEvaluationLoading(true);
     setEvaluationError("");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/evaluation");
+      const url = forceRefresh
+        ? "http://127.0.0.1:8000/evaluation?force_refresh=true"
+        : "http://127.0.0.1:8000/evaluation";
+      const response = await fetch(url);
       if (!response.ok) {
         const errorData = (await response.json()) as { detail?: string };
         throw new Error(errorData.detail || "API error");
@@ -327,7 +330,7 @@ function App() {
 
   useEffect(() => {
     if (activeTab === "evaluation" && evaluationResults.length === 0 && !evaluationLoading) {
-      void fetchEvaluation();
+      void fetchEvaluation(false);
     }
   }, [activeTab]);
 
@@ -384,7 +387,7 @@ function App() {
             trendMetric={trendMetric}
             setTrendMetric={setTrendMetric}
             maxSessionTrendValue={maxSessionTrendValue}
-            onRefresh={fetchEvaluation}
+            onRefresh={() => void fetchEvaluation(true)}
             onOpenMobileMenu={() => setMobileOpen(true)}
           />
         )}
