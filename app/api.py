@@ -52,6 +52,7 @@ class ChatResponse(BaseModel):
     mode: str
     top_files: list[dict]
     history: list[dict]
+    metadata: dict[str, Any] | None = None
 
 
 class EvaluationStats(BaseModel):
@@ -79,10 +80,13 @@ app.add_middleware(
 )
 
 default_index_dir = Path(DEFAULT_INDEX_DIR)
+legal_index_dir = Path("indexes/legal")
 faiss_index_dir = Path("faiss_index")
 selected_index_dir = default_index_dir
 
-if not index_exists(default_index_dir) and index_exists(faiss_index_dir):
+if index_exists(legal_index_dir):
+    selected_index_dir = legal_index_dir
+elif not index_exists(default_index_dir) and index_exists(faiss_index_dir):
     selected_index_dir = faiss_index_dir
 elif not index_exists(default_index_dir) and not index_exists(faiss_index_dir):
     selected_index_dir = default_index_dir

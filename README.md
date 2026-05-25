@@ -137,6 +137,42 @@ Use the left-side menu to switch between `Chat` và `Evaluation`. The Evaluation
 - Multi-turn (No rewrite)
 - Multi-turn (Rewrite)
 
+## Production Chatbot Pipeline: Adaptive Modular Pipeline
+
+Model 1 to Model 8 are ablation experiments for retrieval research.
+The real chatbot runtime uses an Adaptive Modular Pipeline.
+
+Production design:
+- Existing modules under `rag/modules/history_selection/`, `rag/modules/query_rewriting/`, `rag/modules/retrieval/`, and `rag/modules/reranking/` are stable building blocks.
+- All production routing, escalation, thresholds, and tuning live only in the adaptive pipeline.
+- The runtime starts with cheaper routes and escalates only when retrieval confidence is low.
+- Legacy runtime paths are still available for compatibility.
+
+Pipeline modes:
+
+```bash
+RAG_PIPELINE_MODE=adaptive
+RAG_PIPELINE_MODE=legacy
+RAG_PIPELINE_MODE=modular
+RAG_PIPELINE_MODE=full
+```
+
+Adaptive evaluation:
+
+```bash
+python -m scripts.evaluate_adaptive_pipeline \
+  --eval-path data/multiturn_evaluation_legal.json \
+  --index-dir indexes/legal \
+  --corpus-path data/legal_corpus_chunks.json \
+  --top-k 5 \
+  --output-path logs/eval_runs/adaptive_pipeline_legal_top5.json
+```
+
+Runtime index selection:
+- The app now prefers `indexes/legal` if that directory exists.
+- If `indexes/legal` does not exist, it falls back to `INDEX_DIR` from `.env` (default `indexes/default`).
+- If that default index is missing but `faiss_index` exists, it falls back to `faiss_index`.
+
 --- 
 
 Then start asking questions in terminal or in the web UI.
