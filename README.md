@@ -214,11 +214,7 @@ Mô tả:
 Model 1 giữ nguyên câu hỏi hiện tại làm truy vấn, không sử dụng lịch sử hội thoại, không rewrite, không hybrid retrieval và không reranking. Mô hình dùng FAISS dense retrieval để lấy top-k chunks và đánh giá bằng Hit@k, Recall@k, MRR.
 
 ```bash
-python -m scripts.evaluate_model_1_baseline \
-  --eval-path data/multiturn_evaluation_filled.json \
-  --index-dir indexes/default \
-  --top-k 10 \
-  --output-path logs/eval_runs/model_1_baseline.json
+python -m scripts.evaluate_model_1_baseline --eval-path data/multiturn_evaluation_filled.json --index-dir indexes/default --top-k 10 --output-path logs/eval_runs/model_1_baseline.json
 ```
 
 Model 1 là baseline tuyệt đối cho các model sau, nên không thêm bất kỳ tối ưu nào ngoài dense FAISS retrieval hiện có.
@@ -229,11 +225,7 @@ Description:
 Model 2 uses the conversation history to rewrite the current question into a standalone query. The rewritten query is then passed to the same FAISS dense retriever used in Model 1. This model does not use hybrid retrieval, multi-query expansion, reranking, or answer generation.
 
 ```bash
-python -m scripts.evaluate_model_2_rewrite_dense \
-  --eval-path data/multiturn_evaluation_filled.json \
-  --index-dir indexes/default \
-  --top-k 10 \
-  --output-path logs/eval_runs/model_2_rewrite_dense.json
+python -m scripts.evaluate_model_2_rewrite_dense --eval-path data/multiturn_evaluation_filled.json --index-dir indexes/default --top-k 10 --output-path logs/eval_runs/model_2_rewrite_dense.json
 ```
 
 Important:
@@ -244,12 +236,7 @@ Model 2 must differ from Model 1 only by the query rewriting step. Keep all othe
 Model 3 keeps the original question unchanged and replaces dense-only FAISS retrieval with hybrid retrieval combining dense and sparse signals. It does not use query rewriting, history selection, multi-query, reranking, or answer generation.
 
 ```bash
-python -m scripts.evaluate_model_3_hybrid \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --corpus-path data/legal_corpus_chunks.json \
-  --top-k 10 \
-  --output-path logs/eval_runs/model_3_hybrid_legal.json
+python -m scripts.evaluate_model_3_hybrid --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --corpus-path data/legal_corpus_chunks.json --top-k 10 --output-path logs/eval_runs/model_3_hybrid_legal.json
 ```
 
 ### Model 4: Hybrid Retrieval + Reranking
@@ -257,13 +244,7 @@ python -m scripts.evaluate_model_3_hybrid \
 Model 4 uses the original question, retrieves candidate chunks using hybrid retrieval, then applies a reranker to reorder candidates before selecting final top-k. It does not use query rewriting, history selection, multi-query, or answer generation.
 
 ```bash
-python -m scripts.evaluate_model_4_hybrid_rerank \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --corpus-path data/legal_corpus_chunks.json \
-  --top-k 10 \
-  --candidate-k 30 \
-  --output-path logs/eval_runs/model_4_hybrid_rerank_legal.json
+python -m scripts.evaluate_model_4_hybrid_rerank --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --corpus-path data/legal_corpus_chunks.json --top-k 10 --candidate-k 30 --output-path logs/eval_runs/model_4_hybrid_rerank_legal.json
 ```
 
 ### Model 5: Hybrid History Selection + Query Rewriting + Hybrid Retrieval
@@ -271,13 +252,7 @@ python -m scripts.evaluate_model_4_hybrid_rerank \
 Model 5 uses hybrid history selection to choose useful conversation turns, rewrites the current question using the selected history, then retrieves evidence with hybrid retrieval. It does not use reranking, multi-query, or answer generation.
 
 ```bash
-python -m scripts.evaluate_model_5_hybrid_history \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --corpus-path data/legal_corpus_chunks.json \
-  --top-k 10 \
-  --history-top-k 4 \
-  --output-path logs/eval_runs/model_5_hybrid_history_legal.json
+python -m scripts.evaluate_model_5_hybrid_history --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --corpus-path data/legal_corpus_chunks.json --top-k 10 --history-top-k 4 --output-path logs/eval_runs/model_5_hybrid_history_legal.json
 ```
 
 ### Model 6: Multi-Query Hybrid Retrieval
@@ -285,14 +260,7 @@ python -m scripts.evaluate_model_5_hybrid_history \
 Model 6 extends Model 5 by generating multiple query variants from the rewritten query, retrieving evidence with hybrid retrieval for each query, and fusing the results. It does not use reranking or answer generation.
 
 ```bash
-python -m scripts.evaluate_model_6_multi_query_hybrid \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --corpus-path data/legal_corpus_chunks.json \
-  --top-k 10 \
-  --history-top-k 4 \
-  --num-queries 4 \
-  --output-path logs/eval_runs/model_6_multi_query_hybrid_legal.json
+python -m scripts.evaluate_model_6_multi_query_hybrid --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --corpus-path data/legal_corpus_chunks.json --top-k 10 --history-top-k 4 --num-queries 4 --output-path logs/eval_runs/model_6_multi_query_hybrid_legal.json
 ```
 
 ### Model 7: Full Modular Pipeline
@@ -300,15 +268,7 @@ python -m scripts.evaluate_model_6_multi_query_hybrid \
 Model 7 combines hybrid history selection, query rewriting, multi-query generation, hybrid retrieval, fusion, and reranking. It represents the full optimized retrieval pipeline and is compared against previous ablation models.
 
 ```bash
-python -m scripts.evaluate_model_7_full_pipeline \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --corpus-path data/legal_corpus_chunks.json \
-  --top-k 10 \
-  --candidate-k 40 \
-  --history-top-k 4 \
-  --num-queries 4 \
-  --output-path logs/eval_runs/model_7_full_pipeline_legal.json
+python -m scripts.evaluate_model_7_full_pipeline --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --corpus-path data/legal_corpus_chunks.json --top-k 10 --candidate-k 40 --history-top-k 4 --num-queries 4 --output-path logs/eval_runs/model_7_full_pipeline_legal.json
 ```
 
 ### Model 8: HyDE + Hybrid Retrieval + Reranking
@@ -316,46 +276,52 @@ python -m scripts.evaluate_model_7_full_pipeline \
 Model 8 generates a hypothetical legal passage from the rewritten query, uses it as an expanded retrieval query together with the rewritten query, retrieves evidence with hybrid retrieval, fuses candidates, and reranks them before selecting final top-k. It is used to test whether HyDE improves the full modular retrieval pipeline.
 
 ```bash
-python -m scripts.evaluate_model_8_hyde \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --corpus-path data/legal_corpus_chunks.json \
-  --top-k 5 \
-  --candidate-k 40 \
-  --history-top-k 4 \
-  --output-path logs/eval_runs/model_8_hyde_legal_top5.json
+python -m scripts.evaluate_model_8_hyde --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --corpus-path data/legal_corpus_chunks.json --top-k 5 --candidate-k 40 --history-top-k 4 --output-path logs/eval_runs/model_8_hyde_legal_top5.json
 ```
 
 ### Preparing Legal_Dataset_V1
 
 ```bash
-python -m scripts.prepare_legal_dataset \
-  --input-path data/Legal_Dataset_V1.json \
-  --corpus-output data/legal_corpus_chunks.json \
-  --eval-output data/multiturn_evaluation_legal.json
+python -m scripts.prepare_legal_dataset --input-path data/Legal_Dataset_V1.json --corpus-output data/legal_corpus_chunks.json --eval-output data/multiturn_evaluation_legal.json
+```
+
+### Run All 8 Models With One Command (PowerShell)
+
+Run default pipeline (Top-k = 10):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_legal_eval_all.ps1
+```
+
+Run Top-k = 1:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_legal_eval_all_top1.ps1
+```
+
+Run Top-k = 5:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_legal_eval_all_top5.ps1
+```
+
+Each run will:
+- Prepare legal dataset
+- Build legal index
+- Evaluate all 8 models
+- Print a final summary table in terminal
+- Save summaries to:
+`logs/eval_runs/<run_name>/summary_core_metrics.csv`
+`logs/eval_runs/<run_name>/summary_all_metrics.csv`
+`logs/eval_runs/<run_name>/summary_all_metrics.json`
+
+```bash
+python -m scripts.build_index --mode from_json --corpus-json data/legal_corpus_chunks.json --index-dir indexes/legal
 ```
 
 ```bash
-python -m scripts.build_index \
-  --mode from_json \
-  --corpus-json data/legal_corpus_chunks.json \
-  --index-dir indexes/legal
+python -m scripts.evaluate_model_1_baseline --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --top-k 10 --output-path logs/eval_runs/model_1_baseline_legal.json
 ```
 
 ```bash
-python -m scripts.evaluate_model_1_baseline \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --top-k 10 \
-  --output-path logs/eval_runs/model_1_baseline_legal.json
-```
-
-```bash
-python -m scripts.evaluate_model_2_rewrite_dense \
-  --eval-path data/multiturn_evaluation_legal.json \
-  --index-dir indexes/legal \
-  --top-k 10 \
-  --output-path logs/eval_runs/model_2_rewrite_dense_legal.json
+python -m scripts.evaluate_model_2_rewrite_dense --eval-path data/multiturn_evaluation_legal.json --index-dir indexes/legal --top-k 10 --output-path logs/eval_runs/model_2_rewrite_dense_legal.json
 ```
 
 Important:

@@ -66,3 +66,25 @@
 2026-04-14 12:06:13,259 | INFO | rag.ingestion.indexing | Embedding batch 400 -> 500/55953
 2026-05-20 00:40:59,796 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 199/199
 2026-05-20 00:41:34,494 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=data/legal_corpus_chunks.json, chunks=199, index_dir=indexes/legal
+2026-05-24 22:07:51,003 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 199/199
+2026-05-24 22:08:19,311 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=data/legal_corpus_chunks.json, chunks=199, index_dir=indexes/legal
+2026-05-24 22:12:29,968 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 199/199
+2026-05-24 22:12:58,193 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=runtime_data/legal_corpus_chunks_final.json, chunks=199, index_dir=runtime_indexes/legal_final
+2026-05-24 23:08:54,171 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 200/1179
+2026-05-24 23:09:21,281 | INFO | rag.ingestion.indexing | Embedding batch 200 -> 300/1179
+2026-05-24 23:09:43,492 | INFO | rag.ingestion.indexing | Embedding batch 300 -> 400/1179
+2026-05-24 23:10:10,322 | INFO | rag.ingestion.indexing | Embedding batch 400 -> 500/1179
+2026-05-24 23:10:32,521 | INFO | rag.ingestion.indexing | Embedding batch 500 -> 600/1179
+2026-05-24 23:10:54,699 | INFO | rag.ingestion.indexing | Embedding batch 600 -> 700/1179
+2026-05-24 23:11:14,990 | INFO | rag.ingestion.indexing | Embedding batch 700 -> 800/1179
+2026-05-24 23:11:34,492 | INFO | rag.ingestion.indexing | Embedding batch 800 -> 900/1179
+2026-05-24 23:11:55,641 | INFO | rag.ingestion.indexing | Embedding batch 900 -> 1000/1179
+2026-05-24 23:12:15,357 | INFO | rag.ingestion.indexing | Embedding batch 1000 -> 1100/1179
+2026-05-24 23:12:36,766 | INFO | rag.ingestion.indexing | Embedding batch 1100 -> 1179/1179
+2026-05-24 23:12:50,146 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=data/DataSetRAG.json, chunks=1179, index_dir=faiss_index
+2026-05-24 23:14:03,032 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 199/199
+2026-05-24 23:14:24,174 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=data/legal_corpus_chunks.json, chunks=199, index_dir=faiss_index
+2026-05-25 13:37:10,199 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 199/199
+2026-05-25 13:37:32,277 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=data/legal_corpus_chunks.json, chunks=199, index_dir=indexes/legal
+2026-05-25 19:23:56,820 | INFO | rag.ingestion.indexing | Embedding batch 100 -> 199/199
+2026-05-25 19:24:58,453 | INFO | rag.ingestion.indexing | [BUILD JSON DONE] corpus=runtime_data/legal_corpus_chunks.json, chunks=199, index_dir=indexes/legal
