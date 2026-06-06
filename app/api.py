@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
+import json as _json
 import os
 import time
 from pathlib import Path
@@ -20,6 +22,19 @@ from rag.retrieval.vectorstore import load_vectorstore
 from rag.retrieval.retriever import extract_cids_from_docs, retrieve_documents
 from rag.retrieval.ranking import filter_active_docs
 from rag.utils.io import load_json, save_json
+
+
+class _Encoder(_json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if dataclasses.is_dataclass(o) and not isinstance(o, type):
+            if hasattr(o, "to_dict"):
+                return o.to_dict()
+            return dataclasses.asdict(o)
+        return super().default(o)
+
+
+def _json_dumps(obj: Any) -> str:
+    return _json.dumps(obj, cls=_Encoder)
 
 
 class ChatMessage(BaseModel):
@@ -235,7 +250,6 @@ def chat(request: ChatRequest) -> Any:
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
     if request.stream:
-        import json
         if hasattr(pipeline, "chat_stream"):
             metadata, stream = pipeline.chat_stream(
                 question=request.question,
@@ -244,16 +258,16 @@ def chat(request: ChatRequest) -> Any:
         else:
             result = pipeline.chat(question=request.question, history=request.history)
             def single_chunk_generator():
-                yield f"data: {json.dumps({'event': 'metadata', 'data': result})}\n\n"
-                yield f"data: {json.dumps({'event': 'token', 'data': result['answer']})}\n\n"
+                yield f"data: {_json_dumps({'event': 'metadata', 'data': result})}\n\n"
+                yield f"data: {_json_dumps({'event': 'token', 'data': result['answer']})}\n\n"
                 yield "data: [DONE]\n\n"
             return StreamingResponse(single_chunk_generator(), media_type="text/event-stream")
 
         def event_generator():
-            yield f"data: {json.dumps({'event': 'metadata', 'data': metadata})}\n\n"
+            yield f"data: {_json_dumps({'event': 'metadata', 'data': metadata})}\n\n"
             for chunk in stream:
                 token = getattr(chunk, "content", chunk)
-                yield f"data: {json.dumps({'event': 'token', 'data': token})}\n\n"
+                yield f"data: {_json_dumps({'event': 'token', 'data': token})}\n\n"
             yield "data: [DONE]\n\n"
 
         return StreamingResponse(event_generator(), media_type="text/event-stream")

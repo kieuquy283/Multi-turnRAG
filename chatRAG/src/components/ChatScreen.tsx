@@ -89,7 +89,7 @@ export default function ChatScreen({
         </button>
         <div className="chat-title-container">
           <p className="chat-topic">{activeSessionName || "Trò chuyện"}</p>
-          <span className="chat-model-badge">GROUP5 RAG v1.0</span>
+          <span className="chat-model-badge">GROUP7 RAG v1.0</span>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ export default function ChatScreen({
         {isWelcomeState ? (
           <div className="chat-welcome-screen">
             <div className="welcome-header">
-              <h1 className="welcome-title-gradient">Xin chào, tôi là GROUP5 RAG</h1>
+              <h1 className="welcome-title-gradient">Xin chào, tôi là GROUP7 RAG</h1>
               <p className="welcome-subtitle">Tôi có thể giúp bạn tìm kiếm thông tin, tóm tắt đánh giá và tra cứu văn bản pháp luật.</p>
             </div>
             
@@ -123,7 +123,7 @@ export default function ChatScreen({
                 <div className="message-avatar-column">
                   {message.role === "assistant" ? (
                     <div className="message-avatar assistant-avatar-spark">
-                      <img src={meetmeIcon} alt="GROUP5 RAG" style={{ width: "28px", height: "28px", borderRadius: "50%" }} />
+                      <img src={meetmeIcon} alt="GROUP7 RAG" style={{ width: "28px", height: "28px", borderRadius: "50%" }} />
                     </div>
                   ) : (
                     <div className="message-avatar user-avatar-circle">Y</div>
@@ -132,7 +132,7 @@ export default function ChatScreen({
                 <div className="message-content-column">
                   <div className="message-header-gemini">
                     <span className="sender-name-gemini">
-                      {message.role === "assistant" ? "GROUP5 RAG" : "Bạn"}
+                      {message.role === "assistant" ? "GROUP7 RAG" : "Bạn"}
                     </span>
                     <span className="message-time-gemini">{message.time}</span>
                   </div>
@@ -231,7 +231,7 @@ export default function ChatScreen({
               <div className="message-row assistant">
                 <div className="message-avatar-column">
                   <div className="message-avatar assistant-avatar-spark anim-pulse">
-                    <img src={meetmeIcon} alt="GROUP5 RAG" style={{ width: "28px", height: "28px", borderRadius: "50%" }} />
+                    <img src={meetmeIcon} alt="GROUP7 RAG" style={{ width: "28px", height: "28px", borderRadius: "50%" }} />
                   </div>
                 </div>
                 <div className="message-content-column">
@@ -282,7 +282,7 @@ export default function ChatScreen({
           </button>
         </form>
         <div className="chat-disclaimer">
-          GROUP5 RAG có thể đưa ra thông tin không chính xác về pháp luật. Vui lòng xác minh lại thông tin quan trọng.
+          GROUP7 RAG có thể đưa ra thông tin không chính xác về pháp luật. Vui lòng xác minh lại thông tin quan trọng.
         </div>
       </div>
     </section>

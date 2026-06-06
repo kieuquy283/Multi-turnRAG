@@ -87,8 +87,8 @@ export default function Sidebar({
               </svg>
             </button>
             <div className="brand-info">
-              <img src={meetmeIcon} alt="GROUP5 RAG Logo" style={{ width: "24px", height: "24px", borderRadius: "4px", flexShrink: 0 }} />
-              <span className="brand-title">GROUP5 RAG</span>
+              <img src={meetmeIcon} alt="GROUP7 RAG Logo" style={{ width: "24px", height: "24px", borderRadius: "4px", flexShrink: 0 }} />
+              <span className="brand-title">GROUP7 RAG</span>
             </div>
           </div>
 
